@@ -1,9 +1,9 @@
 import Slider from './src/modules/slider'
 import Magic from './src/modules/magic'
 
-require('./src/styles/goos.css');
+import './src/styles/goos.css';
 
-module.exports = function (domElements, options) {
+module.exports = function goos(domElements, options) {
     const init = (domElement) => {
         if (options && options.method === 'magic') {
             return new Magic(domElement, Object.assign(options, {

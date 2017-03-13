@@ -10,7 +10,7 @@ module.exports = {
     output: {
         path: __dirname + '/dist',
         filename: 'goos.min.js',
-        library: 'Goos'
+        library: 'goos'
     },
 
     watch: NODE_ENV === 'development',

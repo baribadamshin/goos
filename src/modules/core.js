@@ -1,6 +1,6 @@
 export default class Core {
-    constructor(containerElement, options, customClassNames) {
-        this._setDomElements(containerElement, customClassNames);
+    constructor(containerElement, options) {
+        this._setDomElements(containerElement);
 
         this.setOptions(options);
         this.setUserInterface();
@@ -8,26 +8,13 @@ export default class Core {
     }
 
     /**
-     * Checks element is instanceof HTMLElement
-     * @param {HTMLElement} domElement
-     * @returns {boolean}
-     */
-    static check(domElement) {
-        return domElement instanceof HTMLElement;
-    }
-
-    /**
      * @returns {{size: *}}
-     * @param {string} className
+     * @param {HtmlElement} block
      */
-    static getOptionsFromClassName(className) {
-        // бабель транспайлит дефолтные значения вот в такой ад
-        // var className = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-        className = className || '';
-
-        const responsive = /goos_responsive/.test(className);
-        const margin = /goos_margin/.test(className);
-        const size = Number(className.replace(/.+goos_size_(\d).{0,}/, '$1')) || 1;
+    static getOptionsFromBlockClass(block) {
+        const responsive = block.classList.contains('goos_responsive');
+        const margin = block.classList.contains('goos_margin');
+        const size = Number((block.className.match(/goos_size_(\d+)/) || [])[1] || 1);
 
         return {size, responsive, margin};
     }
@@ -61,14 +48,13 @@ export default class Core {
      *
      * @private
      * @param {HtmlElement} containerElement
-     * @param {Object} customClassNames
      */
-    _setDomElements(containerElement, customClassNames) {
-        if (this.constructor.check(containerElement) === false) {
+    _setDomElements(containerElement) {
+        if (containerElement instanceof HTMLElement === false) {
             throw new TypeError('You should pass DOM element as first argument');
         }
 
-        const defaultClassNames = {
+        this._classNames = {
             init: 'goos_init',
             shaft: 'goos__shaft',
             item: 'goos__item',
@@ -79,8 +65,6 @@ export default class Core {
                 off: 'goos__arrow_disabled'
             }
         };
-
-        this._classNames = Object.assign({}, defaultClassNames, customClassNames);
 
         this.block = containerElement;
         this.items = this.block.getElementsByClassName(this._classNames.item);
@@ -99,7 +83,7 @@ export default class Core {
         // сохраним оригинальные значения
         this._originalOptions = options;
 
-        const defineOptions = this.constructor.getOptionsFromClassName(this.block.className);
+        const defineOptions = this.constructor.getOptionsFromBlockClass(this.block);
         const defaultOptions = {
             current: 0,
             size: defineOptions.size || 1,
