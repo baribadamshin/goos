@@ -1,6 +1,6 @@
 {
   "name": "goos",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Goos — super fast slider/carousel with no dependencies",
   "main": "goos.js",
   "dependencies": {},
