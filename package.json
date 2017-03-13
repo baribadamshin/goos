@@ -17,6 +17,9 @@
     "extract-text-webpack-plugin": "^2.1.0",
     "postcss-csso": "^1.1.2"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {},
   "repository": {
     "type": "git",
