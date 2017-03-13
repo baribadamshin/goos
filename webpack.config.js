@@ -20,7 +20,11 @@ module.exports = {
             {
                 test: /\.js$/,
                 exclude: /node_modules/,
-                loader: 'babel-loader?presets[]=es2015'
+                loader: 'babel-loader',
+                query: {
+                    presets: ['es2015'],
+                    plugins: ['transform-object-assign']
+                }
             }, {
                 test: /\.css$/,
                 use: ExtractTextPlugin.extract({
