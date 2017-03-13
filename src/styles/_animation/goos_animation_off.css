@@ -1,0 +1,4 @@
+.goos_animation_off .goos__item:first-child
+{
+    transition-timing-function: step-start;
+}

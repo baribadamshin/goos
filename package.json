@@ -1,0 +1,41 @@
+{
+  "name": "goos",
+  "version": "1.0.0",
+  "description": "Goos — super fast slider/carousel with no dependencies",
+  "main": "goos.js",
+  "dependencies": {},
+  "devDependencies": {
+    "babel-cli": "^6.23.0",
+    "babel-core": "^6.23.1",
+    "babel-loader": "^6.3.2",
+    "babel-preset-es2015": "^6.22.0",
+    "webpack": "^2.2.1",
+    "css-loader": "^0.26.4",
+    "style-loader": "^0.13.2",
+    "postcss-smart-import": "^0.6.9",
+    "autoprefixer": "^6.7.6",
+    "extract-text-webpack-plugin": "^2.1.0",
+    "postcss-csso": "^1.1.2"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/baribadamshin/goos.git"
+  },
+  "keywords": [
+    "css",
+    "fast",
+    "simple",
+    "slider",
+    "carousel"
+  ],
+  "author": {
+    "name": "Bari Badamshin",
+    "email": "bari.badamshin@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/baribadamshin/goos/issues"
+  },
+  "homepage": "https://github.com/baribadamshin/goos#readme"
+}

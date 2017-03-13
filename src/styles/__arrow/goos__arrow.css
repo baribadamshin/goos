@@ -1,0 +1,27 @@
+.goos__arrow
+{
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+
+    /* чтобы объект казался ровно по центру, нужно размещать его чуть-чуть выше центра */
+    transform: translateY(-51%);
+
+    width: 50px;
+    height: 50px;
+
+    border: 0;
+    border-radius: 50%;
+    background: #000;
+
+    transition: .2s ease;
+}
+
+
+@media (max-width: 1100px) {
+    .goos__arrow
+    {
+        width: 40px;
+        height: 40px;
+    }
+}

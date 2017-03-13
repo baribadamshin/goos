@@ -1,0 +1,44 @@
+/* 1 - косметический стиль */
+
+.goos_margin .goos__shaft{
+    margin-right: -14px;
+    clip-path: inset(0 14px 0 0); /*1*/
+}
+
+.goos_margin .goos__item
+{
+    min-width: calc(100% - 14px);
+    margin-right: 14px;
+}
+
+.goos_margin.goos_size_2 .goos__shaft
+{
+    margin-right: calc(-14px / 2);
+    clip-path: inset(0 calc(14px / 2) 0 0); /*1*/
+    padding-right: calc(50% + 0px);
+    scroll-snap-points-x: repeat(calc(50% + 0px))
+}
+
+.goos_margin.goos_size_3 .goos__shaft
+{
+    margin-right: calc(-14px / 3);
+    clip-path: inset(0 calc(14px / 3) 0 0); /*1*/
+}
+
+.goos_margin.goos_size_4 .goos__shaft
+{
+    margin-right: calc(-14px / 4);
+    clip-path: inset(0 calc(14px / 4) 0 0); /*1*/
+}
+
+.goos_margin.goos_size_5 .goos__shaft
+{
+    margin-right: calc(-14px / 5);
+    clip-path: inset(0 calc(14px / 5) 0 0); /*1*/
+}
+
+.goos_margin.goos_size_6 .goos__shaft
+{
+    margin-right: calc(-14px / 6);
+    clip-path: inset(0 calc(14px / 6) 0 0); /*1*/
+}

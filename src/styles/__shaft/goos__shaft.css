@@ -1,0 +1,18 @@
+.goos__shaft
+{
+    display: flex;
+    overflow: scroll;
+
+    box-sizing: border-box;
+    min-width: 100%;
+
+    flex-wrap: nowrap;
+    scroll-snap-type: mandatory;
+    scroll-snap-points-x: repeat(100%);
+
+
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+
+    transform: translate3d(0, 0, 0);
+}

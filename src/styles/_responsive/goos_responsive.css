@@ -1,0 +1,50 @@
+.goos_responsive::before
+{
+    font-size: 0;
+
+    position: absolute;
+
+    visibility: hidden;
+}
+
+@media (max-width: 900px)
+{
+    /* 3 */
+    .goos_responsive .goos__shaft
+    {
+        padding-right: calc(100% / 3 * 2);
+    }
+
+    .goos_responsive::before
+    {
+        /* сколько элементов */
+        content: '3';
+    }
+
+    /* коррекция для отступов */
+    .goos_responsive.goos_margin .goos__shaft
+    {
+        margin-right: calc(-14px / 3);
+    }
+}
+
+
+@media (max-width: 700px)
+{
+    /* 2 */
+    .goos_responsive .goos__shaft
+    {
+        padding-right: 50%;
+    }
+
+    .goos_responsive::before
+    {
+        content: '2';
+    }
+
+    .goos_responsive.goos_margin .goos__shaft
+    {
+        margin-right: calc(-14px/2);
+        padding-right: calc(50% + 0px);
+    }
+}

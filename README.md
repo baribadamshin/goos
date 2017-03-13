@@ -1,2 +1,1 @@
-# goos
-Good one Slider
+# Good one Slider
