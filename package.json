@@ -2,7 +2,7 @@
   "name": "goos",
   "version": "1.0.3",
   "description": "Goos — super fast slider/carousel with no dependencies",
-  "main": "goos.js",
+  "main": "dist/goos.min.js",
   "dependencies": {},
   "devDependencies": {
     "autoprefixer": "^6.7.6",
