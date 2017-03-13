@@ -8,15 +8,23 @@ export default class Core {
     }
 
     /**
-     * @returns {{size: *}}
+     * @typedef {Object} OptionsFromBlockClass
+     * @property {number} size
+     * @property {boolean} margin
+     * @property {boolean} responsive
+     */
+
+    /**
+     * Static method for getting options from HtmlElement classNames property
      * @param {HtmlElement} block
+     * @returns {OptionsFromBlockClass}
      */
     static getOptionsFromBlockClass(block) {
         const responsive = block.classList.contains('goos_responsive');
         const margin = block.classList.contains('goos_margin');
         const size = Number((block.className.match(/goos_size_(\d+)/) || [])[1] || 1);
 
-        return {size, responsive, margin};
+        return {responsive, margin, size};
     }
 
     /**
@@ -96,9 +104,10 @@ export default class Core {
 
         if (defineOptions.responsive) {
             let size = getComputedStyle(this.block, '::before').getPropertyValue('content').replace(/'/g, '');
-            size = size.length && parseInt(JSON.parse(size));
+            // size !== 'none' for FF
+            size = size.length && size !== 'none' && parseInt(JSON.parse(size));
 
-            if(size) {
+            if (size) {
                 styleOptions.size = size;
                 styleOptions.slideBy = size;
             } else {

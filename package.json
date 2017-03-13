@@ -20,7 +20,10 @@
   "files": [
     "dist"
   ],
-  "scripts": {},
+  "scripts": {
+    "build": "NODE_ENV=production webpack",
+    "build:demo": "npm run build && cp -r ./dist/ ./docs/assets"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/baribadamshin/goos.git"

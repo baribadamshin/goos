@@ -24,7 +24,7 @@ export default class Slider extends Core {
             ]
         };
 
-        const observer = new MutationObserver((mutations) => {
+        const observer = new MutationObserver(mutations => {
             for (let record of mutations) {
                 this.setOptions();
             }
