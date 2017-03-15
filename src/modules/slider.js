@@ -6,16 +6,11 @@ export default class Slider extends Core {
     }
 
     action() {
-        // в сафари есть разница между размерами в процентах и размерами в "проценты +/- пиксели"
-        // в первом случае не будет округления, а во втором — будет
-        // Поэтому если мы указываем элементу "нечестные" проценты, то и сдвигать нам нужно так же
-        // в остальных браузерах все ок
-        const safariExpression = (this._options.margin) ? '+ 0px' : '';
-
-        this._head.style.marginLeft = `calc(100% * ${this.current} * -1 ${safariExpression})`;
+        this._head.style.marginLeft = (100 * this.current * -1) + '%';
     }
 
     bindObservers() {
+        let observer;
         const config = {
             attributes: true,
             attributeOldValue: true,
@@ -24,11 +19,15 @@ export default class Slider extends Core {
             ]
         };
 
-        const observer = new MutationObserver(mutations => {
-            for (let record of mutations) {
-                this.setOptions();
-            }
-        });
+        // в древних браузерах этого нет
+        // а мы поддерживаем UC browser и Opera mini
+        try {
+            observer = new MutationObserver(mutations => {
+                for (let record of mutations) {
+                    this.setOptions();
+                }
+            });
+        } catch (e) {}
 
         if (this._options.responsive) {
             const windowResizeHandler = () => {
@@ -48,6 +47,6 @@ export default class Slider extends Core {
             });
         }
 
-        observer.observe(this.block, config);
+        observer && observer.observe(this.block, config);
     }
 }

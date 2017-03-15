@@ -1,4 +1,4 @@
 .goos_size_3 .goos__shaft
 {
-    padding-right: calc(100% / 3 * 2);
+    padding-right: 66.6%; /* calc(100% / 3 * 2); */
 }

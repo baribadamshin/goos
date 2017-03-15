@@ -16,14 +16,16 @@
     "postcss-csso": "^1.1.2",
     "postcss-smart-import": "^0.6.9",
     "style-loader": "^0.13.2",
-    "webpack": "^2.2.1"
+    "webpack": "^2.2.1",
+    "eruda": "^1.2.2"
   },
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "NODE_ENV=production webpack",
-    "build:demo": "npm run build && cp -r ./dist/ ./docs/assets"
+    "build:demo": "npm run build && cp -r ./dist/ ./docs/assets",
+    "build:debug": "npm run build:demo && cp ./node_modules/eruda/eruda.min.js ./docs/assets"
   },
   "repository": {
     "type": "git",
