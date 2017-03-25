@@ -1,10 +1,10 @@
 export default class Core {
     constructor(containerElement, options) {
-        this._setDomElements(containerElement);
-
-        this.setOptions(options);
-        this.setUserInterface();
-        this.bindObservers();
+        if (this._setDomElements(containerElement) === true) {
+            this.setOptions(options);
+            this.setUserInterface();
+            this.bindObservers();
+        }
     }
 
     /**
@@ -59,7 +59,9 @@ export default class Core {
      */
     _setDomElements(containerElement) {
         if (containerElement instanceof HTMLElement === false) {
-            throw new TypeError('You should pass DOM element as first argument');
+            // throw new TypeError('You should pass DOM element as first argument');
+            console.warn('You should pass DOM element as first argument');
+            return false;
         }
 
         this._classNames = {
@@ -79,6 +81,8 @@ export default class Core {
 
         // если хочется что-то доопределить в дочерних классах
         this.setCustomDomElements();
+
+        return true;
     }
 
     /**

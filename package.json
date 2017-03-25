@@ -23,9 +23,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "NODE_ENV=production webpack",
-    "build:demo": "npm run build && cp -r ./dist/ ./docs/assets",
-    "build:debug": "npm run build:demo && cp ./node_modules/eruda/eruda.min.js ./docs/assets"
+    "build": "NODE_ENV=production webpack"
   },
   "repository": {
     "type": "git",

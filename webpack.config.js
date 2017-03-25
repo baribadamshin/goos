@@ -6,7 +6,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 module.exports = {
-    entry: './goos',
+    entry: './src/js/goos',
     output: {
         path: __dirname + '/dist',
         filename: 'goos.min.js',
@@ -46,9 +46,7 @@ module.exports = {
 if (NODE_ENV === 'production') {
     module.exports.plugins.push(
         new webpack.optimize.UglifyJsPlugin({
-            compress: {
-                drop_console: true
-            }
+            compress: {}
         })
     )
 }

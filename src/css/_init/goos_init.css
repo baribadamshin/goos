@@ -5,5 +5,5 @@
 
 .goos_init .goos__item:first-child
 {
-    transition: .75s margin-left ease;
+    transition: .65s margin-left ease;
 }

@@ -1,7 +1,7 @@
-import Slider from './src/modules/slider'
-import Magic from './src/modules/magic'
+import Slider from './slider'
+import Magic from './magic'
 
-import './src/styles/goos.css';
+import '../css/goos.css';
 
 module.exports = function goos(domElements, options) {
     const init = (domElement) => {
@@ -15,7 +15,7 @@ module.exports = function goos(domElements, options) {
         }
     };
 
-    if (domElements.length) {
+    if (domElements && domElements.length) {
         return Array.prototype.map.call(domElements, init);
     } else {
         return init(domElements)

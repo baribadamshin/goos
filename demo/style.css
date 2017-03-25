@@ -1,0 +1,35 @@
+body
+{
+    padding: 2%;
+}
+
+.goos
+{
+    max-width: 900px;
+    margin: 0 auto 2%;
+}
+
+.goos__item .snippet
+{
+    font-size: 30px;
+    line-height: 200px;
+
+    height: 200px;
+
+    text-align: center;
+
+    color: #fff;
+    background: deepskyblue;
+}
+
+.goos__item:nth-child(odd) .snippet
+{
+    background: #dedede;
+}
+
+
+.example0 .snippet
+{
+    height: 400px;
+    line-height: 400px;
+}

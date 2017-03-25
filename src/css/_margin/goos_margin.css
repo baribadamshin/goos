@@ -9,7 +9,7 @@
 
 .goos_margin .goos__item
 {
-    border-right: 14px solid;
+    border-right: 14px solid transparent;
 }
 
 .goos_margin.goos_size_2 .goos__shaft
