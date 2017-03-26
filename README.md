@@ -2,7 +2,7 @@
 
 ![Карусель](https://cs7055.userapi.com/c636625/v636625473/525ad/60RGkUCfLLw.jpg)
 
-*Good one Slider* или кротко *Goos*, это очень простая карусель/слайдер/галерея, которая не требует никаких зависимостей,
+*Good one Slider* или коротко *Goos*, это очень простая карусель/слайдер/галерея, которая не требует никаких зависимостей,
 очень мало весит, прекрасно работает на любых устройствах и очень просто настраивается.
  
 #### Основные отличительные черты:
@@ -34,7 +34,7 @@
 #### Подключение
 ```html
 <!-- самый простой вариант -->
-<link href="path/to/goos.min.css" rel="stylesheet">
+<link href="path/to/goos.min.css" rel="stylesheet" />
 <script src="path/to/goos.min.js"></script>
 ```
 
@@ -59,20 +59,20 @@
         <li class="goos__item"><div class="snippet">1</div>
         <li class="goos__item"><div class="snippet">2</div>
         <li class="goos__item"><div class="snippet">3</div>
-        
         <!-- ... -->
-        
         <li class="goos__item"><div class="snippet">30</div>
     </ul>
 </div>
 ```
 
 #### Инициализация
-После подключения библиотеки, вам будет доступна глобальная функция `goos(elements, [options])`
+После подключения библиотеки, вам будет доступна глобальная функция `goos(blocks, [options])`
 ```html
 <script>
-    // @param {HtmlElement|HTMLCollection|NodeList} - DOM элементы 
-    // @param {Object} - опции
+    /**
+     * @param {HtmlElement|HTMLCollection|NodeList} - DOM элемент(ы)
+     * @param {Object} - опции
+     */
     goos(document.querySelectorAll('.goos'), {
         current: 0, // активный элемент, по умолчанию первый
         enableArrows: true, // нарисовать стрелки, по умолчанию true 
