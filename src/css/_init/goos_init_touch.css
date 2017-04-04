@@ -1,0 +1,4 @@
+/* мы матчимся на эти правила в js для того чтобы узнать что поменялась ориентация */
+@media all and (orientation: landscape) {}
+
+@media all and (orientation: portrait) {}

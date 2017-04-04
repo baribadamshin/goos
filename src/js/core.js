@@ -1,6 +1,8 @@
 export default class Core {
     constructor(containerElement, options) {
         if (this._setDomElements(containerElement) === true) {
+            this.support = this.constructor.getBrowserSupportFeatures();
+
             this.setOptions(options);
             this.setUserInterface();
             this.bindObservers();
@@ -25,6 +27,16 @@ export default class Core {
         const size = Number((block.className.match(/goos_size_(\d+)/) || [])[1] || 1);
 
         return {responsive, margin, size};
+    }
+
+    static getBrowserSupportFeatures() {
+        const matchMedia = 'matchMedia' in window;
+        const mutationObserver = 'MutationObserver' in window;
+
+        return {
+            matchMedia,
+            mutationObserver
+        }
     }
 
     /**
@@ -65,9 +77,8 @@ export default class Core {
         }
 
         this._classNames = {
-            init: 'goos_init',
+            init: 'goos_init_desktop',
             shaft: 'goos__shaft',
-            item: 'goos__item',
             arrows: {
                 base: 'goos__arrow',
                 prev: 'goos__arrow_prev',
@@ -77,10 +88,11 @@ export default class Core {
         };
 
         this.block = containerElement;
-        this.items = this.block.getElementsByClassName(this._classNames.item);
+        this.shaft = this.block.getElementsByClassName(this._classNames.shaft)[0];
+        this.items = this.shaft.children;
 
         // если хочется что-то доопределить в дочерних классах
-        this.setCustomDomElements();
+        this.setDomElements();
 
         return true;
     }
@@ -100,7 +112,7 @@ export default class Core {
             current: 0,
             size: defineOptions.size || 1,
             slideBy: (options && options.slideBy) || defineOptions.size,
-            enableArrows: true
+            enableArrows: false
         };
 
         // опции которые мы пробрасываем из стилей
@@ -132,14 +144,6 @@ export default class Core {
         this.current = this._options.current;
     }
 
-    setUserInterface() {
-        // запиливаем кнопки
-        this._options.enableArrows && this._createArrows();
-        this._options.enableArrows && this._setArrowsActivity();
-
-        this.block.classList.add(this._classNames.init);
-    }
-
     _setCurrentStage(value) {
         value = Number(value);
 
@@ -164,6 +168,10 @@ export default class Core {
         this._edge = false;
     }
 
+    setUserInterface() {
+        this.block.classList.add(this._classNames.init);
+    }
+
     _createArrows() {
         let arrowPrev = document.createElement('button');
         let arrowNext = arrowPrev.cloneNode(false);
@@ -178,6 +186,8 @@ export default class Core {
 
         this.arrowNext = this.block.insertBefore(arrowNext, this.block.firstChild);
         this.arrowPrev = this.block.insertBefore(arrowPrev, this.block.firstChild);
+
+        return true;
     }
 
     // включаем и выключаем стрелки
@@ -199,5 +209,5 @@ export default class Core {
 
     action() {}
     bindObservers() {}
-    setCustomDomElements() {}
+    setDomElements() {}
 }

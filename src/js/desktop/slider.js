@@ -1,16 +1,24 @@
-import Core from './core';
+import Core from '../core';
 
 export default class Slider extends Core {
-    setCustomDomElements() {
+    setDomElements() {
         this._head = this.items[0];
+
+        this._classNames.init = 'goos_init_desktop';
+    }
+
+    setUserInterface() {
+        super.setUserInterface();
+
+        // запиливаем кнопки
+        this._options.enableArrows && this._createArrows() && this._setArrowsActivity();
     }
 
     action() {
-        this._head.style.marginLeft = (100 * this.current * -1) + '%';
+        this._head.style.marginLeft = (-100 * this.current) + '%';
     }
 
     bindObservers() {
-        let observer;
         const config = {
             attributes: true,
             attributeOldValue: true,
@@ -19,15 +27,15 @@ export default class Slider extends Core {
             ]
         };
 
-        // в древних браузерах этого нет
-        // а мы поддерживаем UC browser и Opera mini
-        try {
-            observer = new MutationObserver(mutations => {
+        if (this.support.mutationObserver) {
+            const observer = new MutationObserver(mutations => {
                 for (let record of mutations) {
                     this.setOptions();
                 }
             });
-        } catch (e) {}
+
+            observer.observe(this.block, config);
+        }
 
         if (this._options.responsive) {
             const windowResizeHandler = () => {
@@ -46,7 +54,5 @@ export default class Slider extends Core {
                 resizeHandlerId = setTimeout(windowResizeHandler, 250);
             });
         }
-
-        observer && observer.observe(this.block, config);
     }
 }

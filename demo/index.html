@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
 
-    <script src="https://unpkg.com/goos@1.0.6/dist/goos.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/goos@1.0.6/dist/goos.min.css" />
+    <script src="../dist/goos.min.js"></script>
+    <link rel="stylesheet" href="../dist/goos.min.css" />
     <link rel="stylesheet" href="style.css" />
 
     <title>Good one Slider</title>
@@ -13,7 +13,8 @@
 <body>
     <div class="goos goos_margin example0">
         <ul class="goos__shaft">
-            <li class="goos__item"><div class="snippet">1</div>
+            <li class="goos__item"><div class="snippet">1</div></li>
+            <!--ghbdtn-->
             <li class="goos__item"><div class="snippet">2</div>
             <li class="goos__item"><div class="snippet">3</div>
             <li class="goos__item"><div class="snippet">4</div>
@@ -935,9 +936,6 @@
 
 
     <script>
-        goos(document.querySelectorAll('.example0'));
-        goos(document.getElementsByClassName('example2'));
-
         if (/eruda=true/.test(window.location)) {
             var scriptTag = document.createElement('script');
 
@@ -948,6 +946,9 @@
 
             document.head.insertBefore(scriptTag, document.head.firstChild);
         }
+
+        goos(document.querySelectorAll('.example0'), {enableArrows: true});
+        goos(document.getElementsByClassName('example2'), {enableArrows: true});
     </script>
 </body>
 </html>

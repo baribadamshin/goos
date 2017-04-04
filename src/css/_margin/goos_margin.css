@@ -17,7 +17,6 @@
     margin-right: -7px; /* calc(-14px / 2) */
 
     clip-path: inset(0 calc(14px / 2) 0 0); /*1*/
-    scroll-snap-points-x: repeat(50%);
 }
 
 .goos_margin.goos_size_3 .goos__shaft
