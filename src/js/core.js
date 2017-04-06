@@ -30,12 +30,18 @@ export default class Core {
     }
 
     static getBrowserSupportFeatures() {
-        const matchMedia = 'matchMedia' in window;
         const mutationObserver = 'MutationObserver' in window;
+        const matchMediaQuery = 'matchMedia' in window;
+        const scrollSnap = CSS && CSS.supports([
+            '(-webkit-scroll-snap-type: mandatory)',
+            '(-ms-scroll-snap-type: mandatory)',
+            '(scroll-snap-type: mandatory)'
+        ].join('or'));
 
         return {
-            matchMedia,
-            mutationObserver
+            mutationObserver,
+            matchMediaQuery,
+            scrollSnap
         }
     }
 
@@ -169,7 +175,7 @@ export default class Core {
     }
 
     setUserInterface() {
-        this.block.classList.add(this._classNames.init);
+        this.block.classList.add(this._classNames.init)
     }
 
     _createArrows() {
@@ -187,7 +193,7 @@ export default class Core {
         this.arrowNext = this.block.insertBefore(arrowNext, this.block.firstChild);
         this.arrowPrev = this.block.insertBefore(arrowPrev, this.block.firstChild);
 
-        return true;
+        this._setArrowsActivity();
     }
 
     // включаем и выключаем стрелки

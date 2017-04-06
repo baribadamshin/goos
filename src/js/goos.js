@@ -5,7 +5,7 @@ import '../css/goos.css';
 
 function isMobile() {
     // современные мобильные браузеры
-    if (matchMedia('(pointer:coarse)').matches) {
+    if (window.matchMedia && matchMedia('(pointer:coarse)').matches) {
         return true;
     }
 

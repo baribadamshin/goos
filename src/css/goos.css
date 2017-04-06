@@ -24,7 +24,6 @@
 /* вспомогательные штуки */
 @import '_animation/goos_animation_off.css';
 @import '_init/goos_init_desktop.css';
-@import '_init/goos_init_touch.css';
 
 .goos
 {

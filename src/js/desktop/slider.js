@@ -3,15 +3,15 @@ import Core from '../core';
 export default class Slider extends Core {
     setDomElements() {
         this._head = this.items[0];
-
-        this._classNames.init = 'goos_init_desktop';
     }
 
     setUserInterface() {
+        this._classNames.init = 'goos_init_desktop';
+
         super.setUserInterface();
 
         // запиливаем кнопки
-        this._options.enableArrows && this._createArrows() && this._setArrowsActivity();
+        this._options.enableArrows && this._createArrows();
     }
 
     action() {
