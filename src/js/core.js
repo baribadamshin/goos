@@ -17,7 +17,7 @@ export default class Core {
      */
 
     /**
-     * Static method for getting options from HtmlElement classNames property
+     * Get options from HtmlElement classNames property
      * @param {HtmlElement} block
      * @returns {OptionsFromBlockClass}
      */
@@ -29,18 +29,36 @@ export default class Core {
         return {responsive, margin, size};
     }
 
+    /**
+     * @typedef {Object} BrowserSupportFeatures
+     * @property {boolean} mutationObserver
+     * @property {boolean} matchMedia
+     * @property {boolean} scrollSnap
+     */
+
+
+    /**
+     * Checks browser features which Goos use
+     * @returns {BrowserSupportFeatures}
+     */
     static getBrowserSupportFeatures() {
         const mutationObserver = 'MutationObserver' in window;
-        const matchMediaQuery = 'matchMedia' in window;
-        const scrollSnap = CSS && CSS.supports([
-            '(-webkit-scroll-snap-type: mandatory)',
-            '(-ms-scroll-snap-type: mandatory)',
-            '(scroll-snap-type: mandatory)'
-        ].join('or'));
+        const matchMedia = 'matchMedia' in window;
+
+        // выясним умеет ли браузер умную прокрутку
+        let scrollSnapProperty = 'scroll-snap-type: mandatory';
+
+        scrollSnapProperty = [
+            `(-webkit-${scrollSnapProperty})`,
+            `(-ms-${scrollSnapProperty})`,
+            `(${scrollSnapProperty})`,
+        ].join('or');
+
+        const scrollSnap = CSS && CSS.supports(scrollSnapProperty);
 
         return {
+            matchMedia,
             mutationObserver,
-            matchMediaQuery,
             scrollSnap
         }
     }

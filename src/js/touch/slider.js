@@ -22,7 +22,7 @@ export default class TouchSlider extends Core {
 
     bindObservers() {
         // следим за изменением ориентации экрана
-        if (this.support.matchMediaQuery) {
+        if (this.support.matchMedia) {
             const matchPortrait = matchMedia('(orientation: portrait)');
             const matchLandscape = matchMedia('(orientation: landscape)');
 
@@ -37,13 +37,14 @@ export default class TouchSlider extends Core {
             matchLandscape.addListener(orientationChangeHandler);
         }
 
+        // следим за скроллом
+        // после скрола нам нужно поменять значение текущего активного элемента
         const scrollEndHandler = () => {
             // как только мы поменяем значение, сработает action
             this.current = Math.round(this.shaft.scrollLeft / this._options.unitWidth);
         };
-
         let scrollEndHandlerId;
-        // после скрола нам нужно поменять значение текущего активного элемента
+
         this.shaft.addEventListener('scroll', () => {
             clearTimeout(scrollEndHandlerId);
             scrollEndHandlerId = setTimeout(scrollEndHandler, 50);
