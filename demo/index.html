@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <script
+            src="https://code.jquery.com/jquery-3.2.1.js"
+            integrity="sha256-DZAnKJ/6XZ9si04Hgrsxu/8s717jcIzLy3oi35EouyE="
+            crossorigin="anonymous"></script>
+
 
     <script src="../dist/goos.min.js"></script>
     <link rel="stylesheet" href="../dist/goos.min.css" />
@@ -941,14 +946,20 @@
 
             scriptTag.src = '../node_modules/eruda/eruda.min.js';
             scriptTag.onload = function () {
-                eruda.init();
+                eruda.init({
+                    tool: ['console']
+                });
+
+                goos(document.querySelectorAll('.example0'), {enableArrows: true});
+                goos(document.getElementsByClassName('example2'), {enableArrows: true});
             };
 
             document.head.insertBefore(scriptTag, document.head.firstChild);
+        } else {
+            var a = goos(document.querySelectorAll('.example0'), {enableArrows: true});
+            goos(document.getElementsByClassName('example2'), {enableArrows: true});
         }
 
-        goos(document.querySelectorAll('.example0'), {enableArrows: true});
-        goos(document.getElementsByClassName('example2'), {enableArrows: true});
     </script>
 </body>
 </html>

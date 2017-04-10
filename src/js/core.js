@@ -1,7 +1,7 @@
 export default class Core {
     constructor(containerElement, options) {
         if (this._setDomElements(containerElement) === true) {
-            this.support = this.constructor.getBrowserSupportFeatures();
+            this._support = this.constructor.getBrowserSupportFeatures();
 
             this.setOptions(options);
             this.setUserInterface();
@@ -36,7 +36,6 @@ export default class Core {
      * @property {boolean} scrollSnap
      */
 
-
     /**
      * Checks browser features which Goos use
      * @returns {BrowserSupportFeatures}
@@ -54,7 +53,7 @@ export default class Core {
             `(${scrollSnapProperty})`,
         ].join('or');
 
-        const scrollSnap = CSS && CSS.supports(scrollSnapProperty);
+        const scrollSnap = !!(window.CSS && CSS.supports(scrollSnapProperty));
 
         return {
             matchMedia,
@@ -95,7 +94,6 @@ export default class Core {
      */
     _setDomElements(containerElement) {
         if (containerElement instanceof HTMLElement === false) {
-            // throw new TypeError('You should pass DOM element as first argument');
             console.warn('You should pass DOM element as first argument');
             return false;
         }
@@ -125,7 +123,7 @@ export default class Core {
      * Set default options and extend it with new options
      *
      * @param {Object} options
-     * @private
+     * @public
      */
     setOptions(options) {
         // сохраним оригинальные значения
