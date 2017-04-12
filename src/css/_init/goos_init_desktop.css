@@ -1,9 +1,0 @@
-.goos_init_desktop .goos__shaft
-{
-    overflow: hidden;
-}
-
-.goos_init_desktop .goos__item:first-child
-{
-    transition: .65s margin-left ease;
-}

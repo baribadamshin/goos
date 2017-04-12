@@ -1,58 +1,47 @@
 import Core from '../core';
 
 export default class Slider extends Core {
-    setDomElements() {
-        this._head = this.items[0];
-    }
-
     setUserInterface() {
-        this._classNames.init = 'goos_init_desktop';
-
         super.setUserInterface();
 
         // запиливаем кнопки
-        this._options.enableArrows && this._createArrows();
+        this.options.enableArrows && this.createArrows();
+
+        this._addEventListeners();
     }
 
-    action() {
-        this._head.style.marginLeft = (-100 * this.current) + '%';
+    action(current, options) {
+        this.options.enableArrows && this.setArrowsActivity();
+
+        this.head.style.marginLeft = (-100 * current) + '%';
     }
 
-    bindObservers() {
+    _addEventListeners() {
         const config = {
             attributes: true,
             attributeOldValue: true,
             attributeFilter: [
-                'class'
+                'class',
             ]
         };
 
-        if (this._support.mutationObserver) {
-            const observer = new MutationObserver(mutations => {
-                for (let record of mutations) {
-                    this.setOptions();
-                }
+        if (this.support.mutationObserver) {
+            const observer = new MutationObserver(() => {
+                this.setOptions();
             });
 
             observer.observe(this.block, config);
         }
 
-        if (this._options.responsive) {
-            const windowResizeHandler = () => {
-                this.setOptions();
-            };
+        if (this.options.responsive) {
+            const windowResizeHandler = this.debounce(this.setOptions.bind(this), 250);
 
             // когда мы включаем адаптивный режим, нам нужно следить за тем чтобы мы не
             // прокручивали большем элементов чем их видно на экране
             // т.е был слайдер на 4 элемента с прокруткой по 3; окно уменьшилось, теперь слайдер шириной 2
-            // а прокрутка все еще по 3! нам нужно сделать прокрутку равной размеру слайдера
+            // а прокрутка все еще по 3
             // эта информация лежит в контент псевдоэлемента
-            let resizeHandlerId;
-
-            window.addEventListener('resize', () => {
-                clearTimeout(resizeHandlerId);
-                resizeHandlerId = setTimeout(windowResizeHandler, 250);
-            });
+            window.addEventListener('resize', windowResizeHandler);
         }
     }
 }

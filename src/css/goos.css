@@ -23,11 +23,10 @@
 
 /* вспомогательные штуки */
 @import '_animation/goos_animation_off.css';
-@import '_init/goos_init_desktop.css';
+@import '_init/goos_init.css';
+@import '_init/_touch/goos_init_touch.css';
 
 .goos
 {
     position: relative;
-
-    box-sizing: border-box;
 }

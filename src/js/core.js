@@ -1,32 +1,36 @@
 export default class Core {
-    constructor(containerElement, options) {
-        if (this._setDomElements(containerElement) === true) {
-            this._support = this.constructor.getBrowserSupportFeatures();
-
-            this.setOptions(options);
-            this.setUserInterface();
-            this.bindObservers();
+    constructor(container, options) {
+        if (container instanceof HTMLElement === false) {
+            console.warn('You should pass DOM element as first argument');
+            return;
         }
+
+        this.support = this.constructor.getBrowserSupportFeatures();
+
+        this.setDomElements(container);
+        this.setOptions(options);
+        this.setUserInterface();
     }
 
     /**
      * @typedef {Object} OptionsFromBlockClass
      * @property {number} size
-     * @property {boolean} margin
      * @property {boolean} responsive
      */
 
     /**
-     * Get options from HtmlElement classNames property
+     * Get options from HtmlElement className property
      * @param {HtmlElement} block
      * @returns {OptionsFromBlockClass}
      */
     static getOptionsFromBlockClass(block) {
         const responsive = block.classList.contains('goos_responsive');
-        const margin = block.classList.contains('goos_margin');
         const size = Number((block.className.match(/goos_size_(\d+)/) || [])[1] || 1);
 
-        return {responsive, margin, size};
+        return {
+            responsive,
+            size
+        };
     }
 
     /**
@@ -69,14 +73,39 @@ export default class Core {
      */
     set current(value) {
         this._setCurrentStage(value);
-        this._options.enableArrows && this._setArrowsActivity();
-
-        this.action();
+        this.action(this.current, this.options);
     }
 
     get current() {
         return this._options.current;
     }
+
+    /**
+     * @typedef {Object} GoosOptions
+     * @property {number} size
+     * @property {number} slideBy
+     * @property {boolean} enableArrows
+     * @property {boolean} responsive
+     */
+    get options() {
+        const options = this._options;
+
+        return {
+            size: options.size,
+            slideBy: options.slideBy,
+            enableArrows: options.enableArrows,
+            responsive: options.responsive,
+        }
+    }
+
+    /**
+     * Вызывается всякий раз при изменении значения свойства current
+     *
+     * @abstract
+     * @param {number} current
+     * @param {Object} options
+     */
+    action(current, options) {}
 
     prev() {
         this.current -= this._options.slideBy;
@@ -89,17 +118,12 @@ export default class Core {
     /**
      * Check current DOM Element and set it up to private property
      *
-     * @private
-     * @param {HtmlElement} containerElement
+     * @public
+     * @param {HtmlElement} container
      */
-    _setDomElements(containerElement) {
-        if (containerElement instanceof HTMLElement === false) {
-            console.warn('You should pass DOM element as first argument');
-            return false;
-        }
-
-        this._classNames = {
-            init: 'goos_init_desktop',
+    setDomElements(container) {
+        this.classNames = {
+            init: 'goos_init',
             shaft: 'goos__shaft',
             arrows: {
                 base: 'goos__arrow',
@@ -109,26 +133,19 @@ export default class Core {
             }
         };
 
-        this.block = containerElement;
-        this.shaft = this.block.getElementsByClassName(this._classNames.shaft)[0];
+        this.block = container;
+        this.shaft = this.block.getElementsByClassName(this.classNames.shaft)[0];
         this.items = this.shaft.children;
-
-        // если хочется что-то доопределить в дочерних классах
-        this.setDomElements();
-
-        return true;
+        this.head = this.items[0];
     }
 
     /**
      * Set default options and extend it with new options
      *
-     * @param {Object} options
+     * @param {Object} [options]
      * @public
      */
-    setOptions(options) {
-        // сохраним оригинальные значения
-        this._originalOptions = options;
-
+    setOptions(options = {}) {
         const defineOptions = this.constructor.getOptionsFromBlockClass(this.block);
         const defaultOptions = {
             current: 0,
@@ -149,7 +166,7 @@ export default class Core {
                 styleOptions.size = size;
                 styleOptions.slideBy = size;
             } else {
-                styleOptions.slideBy = (this._originalOptions && this._originalOptions.slideBy) || defineOptions.size;
+                styleOptions.slideBy = options.slideBy || defineOptions.size;
             }
         }
 
@@ -191,17 +208,17 @@ export default class Core {
     }
 
     setUserInterface() {
-        this.block.classList.add(this._classNames.init)
+        this.block.classList.add(this.classNames.init)
     }
 
-    _createArrows() {
+    createArrows() {
         let arrowPrev = document.createElement('button');
         let arrowNext = arrowPrev.cloneNode(false);
 
-        arrowNext.className = arrowPrev.className = this._classNames.arrows.base;
+        arrowNext.className = arrowPrev.className = this.classNames.arrows.base;
 
-        arrowPrev.classList.add(this._classNames.arrows.prev);
-        arrowNext.classList.add(this._classNames.arrows.next);
+        arrowPrev.classList.add(this.classNames.arrows.prev);
+        arrowNext.classList.add(this.classNames.arrows.next);
 
         arrowPrev.addEventListener('click', () => this.prev());
         arrowNext.addEventListener('click', () => this.next());
@@ -209,16 +226,16 @@ export default class Core {
         this.arrowNext = this.block.insertBefore(arrowNext, this.block.firstChild);
         this.arrowPrev = this.block.insertBefore(arrowPrev, this.block.firstChild);
 
-        this._setArrowsActivity();
+        this.setArrowsActivity();
     }
 
     // включаем и выключаем стрелки
-    _setArrowsActivity() {
+    setArrowsActivity() {
         if (!this.arrowPrev || !this.arrowNext) {
             return;
         }
 
-        const arrowDisabledClass = this._classNames.arrows.off;
+        const arrowDisabledClass = this.classNames.arrows.off;
 
         this._edge === 'left' && this.arrowPrev.classList.add(arrowDisabledClass);
         this._edge === 'right' && this.arrowNext.classList.add(arrowDisabledClass);
@@ -229,7 +246,20 @@ export default class Core {
         }
     }
 
-    action() {}
-    bindObservers() {}
-    setDomElements() {}
+    /**
+     *
+     * @param {Function} callback
+     * @param {number} wait
+     * @returns {function()}
+     */
+    debounce(callback, wait) {
+        let timeoutId;
+
+        return function() {
+            const later = () => callback.apply(this, arguments);
+
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(later, wait);
+        };
+    };
 }
