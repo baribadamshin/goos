@@ -15,8 +15,8 @@ export default class TouchSlider extends Core {
         this.addEventListeners();
     }
 
-    setOptions() {
-        super.setOptions();
+    setOptions(options) {
+        super.setOptions(options);
 
         this.headWidth = parseFloat(getComputedStyle(this.head).getPropertyValue('width'));
     }
