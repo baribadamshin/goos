@@ -4,19 +4,20 @@ export default class Slider extends Core {
     setUserInterface() {
         super.setUserInterface();
 
-        // запиливаем кнопки
         this.options.enableArrows && this.createArrows();
-
-        this._addEventListeners();
+        this.addEventListeners();
     }
 
     action(current, options) {
-        this.options.enableArrows && this.setArrowsActivity();
-
         this.head.style.marginLeft = (-100 * current) + '%';
     }
 
-    _addEventListeners() {
+    setNavigationState() {
+        super.setNavigationState();
+        this.options.enableArrows && this.setArrowsActivity();
+    }
+
+    addEventListeners() {
         const config = {
             attributes: true,
             attributeOldValue: true,

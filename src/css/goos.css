@@ -7,6 +7,11 @@
 @import '__arrow/_prev/goos__arrow_prev.css';
 @import '__arrow/_next/goos__arrow_next.css';
 
+/* точки */
+@import "__dots/goos__dots.css";
+@import "__dot/goos__dot.css";
+@import "__dot/_active/goos__dot_active.css";
+
 /* размеры */
 @import '_size/goos_size_2.css';
 @import '_size/goos_size_3.css';

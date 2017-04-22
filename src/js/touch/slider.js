@@ -12,12 +12,18 @@ export default class TouchSlider extends Core {
         };
 
         super.setUserInterface();
-        this._addEventListeners();
+        this.addEventListeners();
     }
 
-    action(current) {
+    setOptions() {
+        super.setOptions();
+
+        this.headWidth = parseFloat(getComputedStyle(this.head).getPropertyValue('width'));
+    }
+
+    action(current, options, support) {
         // если браузер не умеет умную прокрутку, нам нужно самим дотолкать элемент
-        if (this.state && this.support.scrollSnap === false) {
+        if (this.state && support.scrollSnap === false) {
             const correctScroll = current * this.headWidth;
 
             if (correctScroll !== this.shaft.scrollLeft) {
@@ -32,13 +38,7 @@ export default class TouchSlider extends Core {
         }
     }
 
-    setOptions(options) {
-        this.headWidth = parseFloat(getComputedStyle(this.head).getPropertyValue('width'));
-
-        super.setOptions();
-    }
-
-    _addEventListeners() {
+    addEventListeners() {
         // следим за изменением ориентации экрана
         if (this.support.matchMedia) {
             const matchPortrait = matchMedia('(orientation: portrait)');
@@ -65,7 +65,6 @@ export default class TouchSlider extends Core {
         // следим за скроллом
         // после скрола нам нужно поменять значение текущего активного элемента
         const scrollEndHandler = () => {
-            debugger;
             this.state.scroll = false;
 
             // только если нет касаний к экрану

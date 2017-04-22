@@ -950,14 +950,16 @@
                     tool: ['console']
                 });
 
-                goos([], {enableArrows: true});
                 goos(document.getElementsByClassName('example2'), {enableArrows: true});
             };
 
             document.head.insertBefore(scriptTag, document.head.firstChild);
         } else {
-            var a = goos(document.querySelectorAll('.example0'), {enableArrows: true});
-            goos(document.getElementsByClassName('example2'), {enableArrows: true});
+            goos(document.querySelectorAll('.example0'), {enableArrows: true});
+            goos(document.getElementsByClassName('example2'), {
+                enableArrows: true,
+                enableDots: true
+            });
         }
 
     </script>

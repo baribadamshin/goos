@@ -13,32 +13,19 @@ export default class Core {
     }
 
     /**
-     * @typedef {Object} OptionsFromBlockClass
-     * @property {number} size
-     * @property {boolean} responsive
+     * Returns modifiers from classList property
+     * @param {DOMTokenList} classList
+     * @returns {OptionsFromBlockClassList}
      */
-
-    /**
-     * Get options from HtmlElement className property
-     * @param {HtmlElement} block
-     * @returns {OptionsFromBlockClass}
-     */
-    static getOptionsFromBlockClass(block) {
-        const responsive = block.classList.contains('goos_responsive');
-        const size = Number((block.className.match(/goos_size_(\d+)/) || [])[1] || 1);
+    static getOptionsFromClassList(classList) {
+        const responsive = classList.contains('goos_responsive');
+        const size = Number((classList.toString().match(/goos_size_(\d+)/) || [])[1] || 1);
 
         return {
             responsive,
             size
         };
     }
-
-    /**
-     * @typedef {Object} BrowserSupportFeatures
-     * @property {boolean} mutationObserver
-     * @property {boolean} matchMedia
-     * @property {boolean} scrollSnap
-     */
 
     /**
      * Checks browser features which Goos use
@@ -48,7 +35,6 @@ export default class Core {
         const mutationObserver = 'MutationObserver' in window;
         const matchMedia = 'matchMedia' in window;
 
-        // выясним умеет ли браузер умную прокрутку
         let scrollSnapProperty = 'scroll-snap-type: mandatory';
 
         scrollSnapProperty = [
@@ -69,11 +55,14 @@ export default class Core {
     /**
      * Setter for 'current' property
      * If set a new value - starts the action
-     * @param value
+     * @param index
      */
-    set current(value) {
-        this._setCurrentStage(value);
-        this.action(this.current, this.options);
+    set current(index) {
+        this._setCurrentStage(index);
+
+        this.setNavigationState();
+
+        this.action(this.current, this.options, this.support, this.items);
     }
 
     get current() {
@@ -81,11 +70,9 @@ export default class Core {
     }
 
     /**
-     * @typedef {Object} GoosOptions
-     * @property {number} size
-     * @property {number} slideBy
-     * @property {boolean} enableArrows
-     * @property {boolean} responsive
+     * Returns Goos public options
+     *
+     * @return {GoosOptions}
      */
     get options() {
         const options = this._options;
@@ -94,18 +81,32 @@ export default class Core {
             size: options.size,
             slideBy: options.slideBy,
             enableArrows: options.enableArrows,
+            enableDots: options.enableDots,
             responsive: options.responsive,
         }
     }
 
     /**
-     * Вызывается всякий раз при изменении значения свойства current
+     * Возвращает количество экранов
+     * Используется для определения количества точек в навигации
+     * например, если карусель показывает по 3 элемента, а всего их 30 — точек будет 10
+     *
+     * @return {number}
+     */
+    get screens() {
+        return Math.ceil(this.items.length / this.options.slideBy);
+    }
+
+    /**
+     * Called each time after `current` value was changed
      *
      * @abstract
      * @param {number} current
      * @param {Object} options
+     * @param {Object} support
+     * @param {HTMLCollection} items
      */
-    action(current, options) {}
+    action(current, options, support, items) {}
 
     prev() {
         this.current -= this._options.slideBy;
@@ -130,6 +131,11 @@ export default class Core {
                 prev: 'goos__arrow_prev',
                 next: 'goos__arrow_next',
                 off: 'goos__arrow_disabled'
+            },
+            dots: {
+                base: 'goos__dots',
+                item: 'goos__dot',
+                active: 'goos__dot_active'
             }
         };
 
@@ -142,22 +148,23 @@ export default class Core {
     /**
      * Set default options and extend it with new options
      *
-     * @param {Object} [options]
      * @public
+     * @param {Object} [options]
      */
     setOptions(options = {}) {
-        const defineOptions = this.constructor.getOptionsFromBlockClass(this.block);
+        const optionsFromClassNames = this.constructor.getOptionsFromClassList(this.block.classList);
         const defaultOptions = {
             current: 0,
-            size: defineOptions.size || 1,
-            slideBy: (options && options.slideBy) || defineOptions.size,
-            enableArrows: false
+            size: optionsFromClassNames.size || 1,
+            slideBy: (options && options.slideBy) || optionsFromClassNames.size,
+            enableArrows: false,
+            enableDots: false,
         };
 
         // опции которые мы пробрасываем из стилей
         let styleOptions = {};
 
-        if (defineOptions.responsive) {
+        if (optionsFromClassNames.responsive) {
             let size = getComputedStyle(this.block, '::before').getPropertyValue('content').replace(/'/g, '');
             // size !== 'none' for FF
             size = size.length && size !== 'none' && parseInt(JSON.parse(size));
@@ -166,7 +173,7 @@ export default class Core {
                 styleOptions.size = size;
                 styleOptions.slideBy = size;
             } else {
-                styleOptions.slideBy = options.slideBy || defineOptions.size;
+                styleOptions.slideBy = options.slideBy || optionsFromClassNames.size;
             }
         }
 
@@ -175,7 +182,7 @@ export default class Core {
             {},
             defaultOptions,
             this._options,
-            defineOptions,
+            optionsFromClassNames,
             options,
             styleOptions
         );
@@ -183,12 +190,18 @@ export default class Core {
         this.current = this._options.current;
     }
 
+    /**
+     * Устанавливает правильное значение для свойства current и определяет
+     * пограниченые состояния
+     * @param value
+     * @private
+     */
     _setCurrentStage(value) {
         value = Number(value);
 
         if (value <= 0) {
             this._options.current = 0;
-            this._edge = 'left';
+            this._edge = 'start';
 
             return;
         }
@@ -198,7 +211,7 @@ export default class Core {
 
         if (value >= lastStep) {
             this._options.current = lastStep;
-            this._edge = 'right';
+            this._edge = 'end';
 
             return;
         }
@@ -208,12 +221,17 @@ export default class Core {
     }
 
     setUserInterface() {
-        this.block.classList.add(this.classNames.init)
+        this.block.classList.add(this.classNames.init);
+
+        this._options.enableDots && this.createDotsNavigation();
     }
 
     createArrows() {
         let arrowPrev = document.createElement('button');
-        let arrowNext = arrowPrev.cloneNode(false);
+
+        arrowPrev.innerHTML = '<i/>';
+
+        let arrowNext = arrowPrev.cloneNode(true);
 
         arrowNext.className = arrowPrev.className = this.classNames.arrows.base;
 
@@ -229,25 +247,82 @@ export default class Core {
         this.setArrowsActivity();
     }
 
-    // включаем и выключаем стрелки
+    createDotsNavigation() {
+        let dotsContainer = document.createElement('ul');
+
+        dotsContainer.classList.add(this.classNames.dots.base);
+        dotsContainer.addEventListener('click', e => {
+            const target = e.target;
+
+            if (target.classList.contains(this.classNames.dots.item)) {
+                const dotIndex = Array.prototype.indexOf.call(dotsContainer.children, target);
+
+                this.current = this.items.length / this.screens * dotIndex;
+            }
+        });
+
+        this.dotsContainer = this.block.appendChild(dotsContainer);
+
+        this.setDots();
+        this.setActiveDot();
+    }
+
+    /**
+     * Рисует нужное количество точек в dotsContainer
+     */
+    setDots() {
+        this.dotsContainer.innerHTML = new Array(this.screens + 1).join(`<li class="${this.classNames.dots.item}" />`)
+    }
+
+    // подсвечивает нужную точку
+    setActiveDot() {
+        if (this.dotsContainer) {
+            const activeDotClassName = this.classNames.dots.active;
+            const dotIndex = Math.round(this.current / this.options.slideBy);
+            const lastActiveDot = this.dotsContainer.querySelector('.' + activeDotClassName);
+
+            lastActiveDot && lastActiveDot.classList.remove(activeDotClassName);
+
+            this.dotsContainer.children[dotIndex].classList.add(activeDotClassName);
+        }
+    }
+
+    // меняет активное состояние стрелок
     setArrowsActivity() {
         if (!this.arrowPrev || !this.arrowNext) {
             return;
         }
 
         const arrowDisabledClass = this.classNames.arrows.off;
+        const arrowDisabledAttribute = 'disabled';
 
-        this._edge === 'left' && this.arrowPrev.classList.add(arrowDisabledClass);
-        this._edge === 'right' && this.arrowNext.classList.add(arrowDisabledClass);
+        if (this._edge === 'start') {
+            this.arrowPrev.setAttribute(arrowDisabledAttribute, true);
+            this.arrowPrev.classList.add(arrowDisabledClass);
+        }
+
+        if (this._edge === 'end') {
+            this.arrowPrev.setAttribute(arrowDisabledAttribute, true);
+            this.arrowNext.classList.add(arrowDisabledClass);
+        }
 
         if (!this._edge) {
+            this.arrowPrev.removeAttribute(arrowDisabledAttribute);
             this.arrowPrev.classList.remove(arrowDisabledClass);
+
+            this.arrowNext.removeAttribute(arrowDisabledAttribute);
             this.arrowNext.classList.remove(arrowDisabledClass);
         }
     }
 
+    setNavigationState() {
+        this.options.enableDots && this.setActiveDot();
+    }
+
     /**
+     * Creates a debounced function that delays invoking callback until after wait milliseconds
      *
+     * @public
      * @param {Function} callback
      * @param {number} wait
      * @returns {function()}
@@ -255,11 +330,30 @@ export default class Core {
     debounce(callback, wait) {
         let timeoutId;
 
-        return function() {
-            const later = () => callback.apply(this, arguments);
-
+        return function () {
             clearTimeout(timeoutId);
-            timeoutId = setTimeout(later, wait);
+            timeoutId = setTimeout(callback, wait);
         };
     };
 }
+
+/**
+ * @typedef {Object} OptionsFromBlockClassList
+ * @property {number} size
+ * @property {boolean} responsive
+ */
+
+/**
+ * @typedef {Object} BrowserSupportFeatures
+ * @property {boolean} mutationObserver
+ * @property {boolean} matchMedia
+ * @property {boolean} scrollSnap
+ */
+
+/**
+ * @typedef {Object} GoosOptions
+ * @property {number} size
+ * @property {number} slideBy
+ * @property {boolean} enableArrows
+ * @property {boolean} responsive
+ */

@@ -4,26 +4,87 @@
     z-index: 2;
     top: 50%;
 
-    /* чтобы объект казался ровно по центру, нужно размещать его чуть-чуть выше центра */
-    transform: translateY(-51%);
-
+    box-sizing: border-box;
     width: 50px;
     height: 50px;
+    padding: 0;
 
+    cursor: pointer;
+    transition: .2s ease;
+    transform: translateY(-50%);
+
+    color: currentColor;
     border: 0;
     border-radius: 50%;
-    background: #000;
+    background: transparent;
 
-    transition: .2s ease;
-
-    touch-action: manipulation
+    touch-action: manipulation;
 }
 
+.goos__arrow::after
+{
+    position: absolute;
+    top: 0;
+    left: 0;
 
-@media (max-width: 1100px) {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+
+    content: '';
+    transition: all .1s;
+
+    opacity: .3;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+}
+
+.goos__arrow:hover::after
+{
+    opacity: .6;
+}
+
+.goos__arrow:focus
+{
+    outline: none;
+    box-shadow: 0 0 6px 4px #ffdb4d;
+}
+
+.goos__arrow:focus::after
+{
+    border-color: transparent;
+}
+
+.goos__arrow i
+{
+    display: block;
+
+    width: 0;
+    height: 0;
+    margin: auto;
+    padding: 10%;
+
+    opacity: .5;
+    border: solid currentColor;
+}
+
+.goos__arrow i::before
+{
+    position: absolute;
+
+    width: 160%;
+    height: 2px;
+
+    content: '';
+
+    background: currentColor;
+}
+
+@media (max-width: 1100px)
+{
     .goos__arrow
     {
-        width: 40px;
-        height: 40px;
+        width: 32px;
+        height: 32px;
     }
 }

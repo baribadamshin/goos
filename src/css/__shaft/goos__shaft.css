@@ -1,24 +1,27 @@
 .goos__shaft
 {
+    display: flex;
+    overflow-x: scroll;
+    overflow-y: hidden;
+
+    box-sizing: border-box;
+    min-width: 100%;
     margin: 0;
     padding: 0;
 
     list-style: none;
 
-    display: flex;
-    overflow-y: hidden;
-    overflow-x: scroll;
-
-    box-sizing: border-box;
-    min-width: 100%;
+    transform: translateZ(0);
 
     flex-wrap: nowrap;
+
     scroll-snap-type: mandatory;
     scroll-snap-points-x: repeat(100%);
 
     scroll-behavior: smooth;
+
     -webkit-overflow-scrolling: touch;
             overflow-scrolling: touch;
 
-    transform: translateZ(0);
+    touch-action: pan-x pinch-zoom double-tap-zoom;
 }

@@ -5,6 +5,21 @@
     margin-left: -20px;
 }
 
+.goos__arrow_prev i
+{
+    border-width: 2px 0 0 2px;
+    transform: rotate(-45deg);
+}
+
+.goos__arrow_prev i::before
+{
+    left: 0;
+    top: -1px;
+
+    transform-origin: 0;
+    transform: rotate(45deg);
+}
+
 @media (max-width: 1100px) {
     .goos__arrow_prev
     {

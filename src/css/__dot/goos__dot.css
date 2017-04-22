@@ -1,0 +1,30 @@
+.goos__dot
+{
+    display: inline-block;
+
+    box-sizing: border-box;
+    padding: 5px;
+
+    cursor: pointer;
+
+    transition: color .1s;
+    color: rgba(0, 0, 0, .1);
+}
+
+.goos__dot:hover
+{
+    color: rgba(0, 0, 0, .3);
+}
+
+.goos__dot::before
+{
+    display: block;
+
+    width: 6px;
+    height: 6px;
+
+    content: '';
+
+    border-radius: 10px;
+    background: currentColor;
+}
