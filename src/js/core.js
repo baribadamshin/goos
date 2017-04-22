@@ -257,7 +257,7 @@ export default class Core {
             if (target.classList.contains(this.classNames.dots.item)) {
                 const dotIndex = Array.prototype.indexOf.call(dotsContainer.children, target);
 
-                this.current = this.items.length / this.screens * dotIndex;
+                this.current = Math.round(this.items.length / this.screens * dotIndex);
             }
         });
 
@@ -296,22 +296,30 @@ export default class Core {
         const arrowDisabledClass = this.classNames.arrows.off;
         const arrowDisabledAttribute = 'disabled';
 
-        if (this._edge === 'start') {
-            this.arrowPrev.setAttribute(arrowDisabledAttribute, true);
-            this.arrowPrev.classList.add(arrowDisabledClass);
-        }
-
-        if (this._edge === 'end') {
-            this.arrowPrev.setAttribute(arrowDisabledAttribute, true);
-            this.arrowNext.classList.add(arrowDisabledClass);
-        }
-
         if (!this._edge) {
             this.arrowPrev.removeAttribute(arrowDisabledAttribute);
             this.arrowPrev.classList.remove(arrowDisabledClass);
 
             this.arrowNext.removeAttribute(arrowDisabledAttribute);
             this.arrowNext.classList.remove(arrowDisabledClass);
+
+            return true;
+        }
+
+        if (this._edge === 'start') {
+            this.arrowPrev.setAttribute(arrowDisabledAttribute, true);
+            this.arrowPrev.classList.add(arrowDisabledClass);
+
+            this.arrowNext.removeAttribute(arrowDisabledAttribute);
+            this.arrowNext.classList.remove(arrowDisabledClass);
+        }
+
+        if (this._edge === 'end') {
+            this.arrowPrev.removeAttribute(arrowDisabledAttribute);
+            this.arrowPrev.classList.remove(arrowDisabledClass);
+
+            this.arrowNext.setAttribute(arrowDisabledAttribute, true);
+            this.arrowNext.classList.add(arrowDisabledClass);
         }
     }
 
