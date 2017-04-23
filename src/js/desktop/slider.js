@@ -1,3 +1,4 @@
+import debounce from '../utils/debounce';
 import Core from '../core';
 
 export default class Slider extends Core {
@@ -5,7 +6,7 @@ export default class Slider extends Core {
         this.head.style.marginLeft = (-100 * current) + '%';
     }
 
-    addEventListeners() {
+    addEventListeners(options, support) {
         const config = {
             attributes: true,
             attributeOldValue: true,
@@ -14,7 +15,7 @@ export default class Slider extends Core {
             ]
         };
 
-        if (this.support.mutationObserver) {
+        if (support.mutationObserver) {
             const observer = new MutationObserver(() => {
                 this.setOptions();
             });
@@ -22,8 +23,8 @@ export default class Slider extends Core {
             observer.observe(this.block, config);
         }
 
-        if (this.options.responsive) {
-            const windowResizeHandler = this.debounce(this.setOptions.bind(this), 250);
+        if (options.responsive) {
+            const windowResizeHandler = debounce(this.setOptions.bind(this), 250);
 
             // когда мы включаем адаптивный режим, нам нужно следить за тем чтобы мы не
             // прокручивали большем элементов чем их видно на экране
@@ -32,5 +33,7 @@ export default class Slider extends Core {
             // эта информация лежит в контент псевдоэлемента
             window.addEventListener('resize', windowResizeHandler);
         }
+
+        super.addEventListeners.apply(this, arguments);
     }
 }

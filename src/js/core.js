@@ -1,3 +1,8 @@
+'use strict';
+
+import getBrowserSupportFeatures from './utils/getBrowserSupportFeatures';
+import getOptionsFromClassList from './utils/getOptionsFromClassList'
+
 export default class Core {
     constructor(container, options) {
         if (container instanceof HTMLElement === false) {
@@ -5,51 +10,11 @@ export default class Core {
             return;
         }
 
-        this.support = this.constructor.getBrowserSupportFeatures();
+        this.support = getBrowserSupportFeatures(window, document);
 
         this.setDomElements(container);
         this.setOptions(options);
         this.setUserInterface();
-    }
-
-    /**
-     * Returns modifiers from classList property
-     * @param {DOMTokenList} classList
-     * @returns {OptionsFromBlockClassList}
-     */
-    static getOptionsFromClassList(classList) {
-        const responsive = classList.contains('goos_responsive');
-        const size = Number((classList.toString().match(/goos_size_(\d+)/) || [])[1] || 1);
-
-        return {
-            responsive,
-            size
-        };
-    }
-
-    /**
-     * Checks browser features which Goos use
-     * @returns {BrowserSupportFeatures}
-     */
-    static getBrowserSupportFeatures() {
-        const mutationObserver = 'MutationObserver' in window;
-        const matchMedia = 'matchMedia' in window;
-
-        let scrollSnapProperty = 'scroll-snap-type: mandatory';
-
-        scrollSnapProperty = [
-            `(-webkit-${scrollSnapProperty})`,
-            `(-ms-${scrollSnapProperty})`,
-            `(${scrollSnapProperty})`,
-        ].join('or');
-
-        const scrollSnap = !!(window.CSS && CSS.supports(scrollSnapProperty));
-
-        return {
-            matchMedia,
-            mutationObserver,
-            scrollSnap
-        }
     }
 
     /**
@@ -70,8 +35,6 @@ export default class Core {
     }
 
     /**
-     * Returns Goos public options
-     *
      * @return {GoosOptions}
      */
     get options() {
@@ -82,6 +45,7 @@ export default class Core {
             slideBy: options.slideBy,
             enableArrows: options.enableArrows,
             enableDots: options.enableDots,
+            allowFullscreen: options.allowFullscreen,
             responsive: options.responsive,
         }
     }
@@ -153,13 +117,14 @@ export default class Core {
      * @param {Object} [options]
      */
     setOptions(options = {}) {
-        const optionsFromClassNames = this.constructor.getOptionsFromClassList(this.block.classList);
+        const optionsFromClassNames = getOptionsFromClassList(this.block.classList);
         const defaultOptions = {
             current: 0,
             size: optionsFromClassNames.size || 1,
             slideBy: (options && options.slideBy) || optionsFromClassNames.size,
             enableArrows: false,
             enableDots: false,
+            allowFullscreen: true,
         };
 
         // опции которые мы пробрасываем из стилей
@@ -221,34 +186,53 @@ export default class Core {
         this._edge = false;
     }
 
-    setUserInterface() {
+    /**
+     *
+     * @param {Object} specific
+     */
+    setUserInterface(specific = {}) {
         this.block.classList.add(this.classNames.init);
 
         this.options.enableArrows && this.createArrows();
-        this._options.enableDots && this.createDotsNavigation();
+        this.options.enableDots && this.createDotsNavigation();
 
-        this.addEventListeners();
+        this.state = Object.assign({
+            fullscreen: false,
+        }, specific);
+
+        this.addEventListeners(this.options, this.support);
     }
 
     /**
-     * @abstract
+     *
+     * @param {object} options
+     * @param {object} support
+     * @public
      */
-    addEventListeners() {}
+    addEventListeners(options, support) {
+        if (options.allowFullscreen && support.fullScreen.changeEventType) {
+            this.block.addEventListener(support.fullScreen.changeEventType, () => {
+                this.state.fullscreen = !!document[support.fullScreen.elementProperty];
+
+                console.log(this.state);
+            });
+        }
+    }
 
     createArrows() {
-        let arrowPrev = document.createElement('button');
+        const arrowPrev = document.createElement('button');
 
         arrowPrev.innerHTML = '<i/>';
 
-        let arrowNext = arrowPrev.cloneNode(true);
+        const arrowNext = arrowPrev.cloneNode(true);
 
         arrowNext.className = arrowPrev.className = this.classNames.arrows.base;
 
         arrowPrev.classList.add(this.classNames.arrows.prev);
         arrowNext.classList.add(this.classNames.arrows.next);
 
-        arrowPrev.addEventListener('click', () => this.prev());
-        arrowNext.addEventListener('click', () => this.next());
+        arrowPrev.addEventListener('click', this.prev.bind(this));
+        arrowNext.addEventListener('click', this.next.bind(this));
 
         this.arrowNext = this.block.insertBefore(arrowNext, this.block.firstChild);
         this.arrowPrev = this.block.insertBefore(arrowPrev, this.block.firstChild);
@@ -259,7 +243,7 @@ export default class Core {
     }
 
     createDotsNavigation() {
-        let dotsContainer = document.createElement('ul');
+        const dotsContainer = document.createElement('ul');
 
         dotsContainer.classList.add(this.classNames.dots.base);
 
@@ -276,7 +260,6 @@ export default class Core {
         this.dotsContainer = this.block.appendChild(dotsContainer);
 
         this.setDots();
-        this.setActiveDot();
 
         this.block.classList.add(this.classNames.dots.init);
     }
@@ -285,20 +268,24 @@ export default class Core {
      * Рисует нужное количество точек в dotsContainer
      */
     setDots() {
-        this.dotsContainer.innerHTML = new Array(this.screens + 1).join(`<li class="${this.classNames.dots.item}" />`)
+        this.dotsContainer.innerHTML = new Array(this.screens + 1).join(`<li class="${this.classNames.dots.item}" />`);
+
+        this.setActiveDot();
     }
 
     // подсвечивает нужную точку
     setActiveDot() {
-        if (this.dotsContainer) {
-            const activeDotClassName = this.classNames.dots.active;
-            const dotIndex = Math.round(this.current / this.options.slideBy);
-            const lastActiveDot = this.dotsContainer.getElementsByClassName(activeDotClassName)[0];
-
-            lastActiveDot && lastActiveDot.classList.remove(activeDotClassName);
-
-            this.dotsContainer.children[dotIndex].classList.add(activeDotClassName);
+        if (!this.dotsContainer) {
+            return;
         }
+
+        const activeDotClassName = this.classNames.dots.active;
+        const dotIndex = Math.round(this.current / this.options.slideBy);
+        const currentActiveDot = this.dotsContainer.getElementsByClassName(activeDotClassName)[0];
+
+        currentActiveDot && currentActiveDot.classList.remove(activeDotClassName);
+
+        this.dotsContainer.children[dotIndex].classList.add(activeDotClassName);
     }
 
     // меняет активное состояние стрелок
@@ -333,37 +320,8 @@ export default class Core {
         this.options.enableArrows && this.setArrowsActivity();
         this.options.enableDots && this.setActiveDot();
     }
-
-    /**
-     * Creates a debounced function that delays invoking callback until after wait milliseconds
-     *
-     * @public
-     * @param {Function} callback
-     * @param {number} wait
-     * @returns {function()}
-     */
-    debounce(callback, wait) {
-        let timeoutId;
-
-        return function () {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(callback, wait);
-        };
-    };
 }
 
-/**
- * @typedef {Object} OptionsFromBlockClassList
- * @property {number} size
- * @property {boolean} responsive
- */
-
-/**
- * @typedef {Object} BrowserSupportFeatures
- * @property {boolean} mutationObserver
- * @property {boolean} matchMedia
- * @property {boolean} scrollSnap
- */
 
 /**
  * @typedef {Object} GoosOptions

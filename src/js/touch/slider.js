@@ -1,3 +1,4 @@
+import debounce from '../utils/debounce';
 import Core from '../core';
 
 export default class TouchSlider extends Core {
@@ -6,14 +7,12 @@ export default class TouchSlider extends Core {
 
         this.classNames.init = 'goos_init_touch';
 
-        // состояния взаимодействия пользователя с каруселькой
-        this.state = {
+        // передадим состояния взаимодействия пользователя с каруселькой специфичные для тача
+        super.setUserInterface({
             touch: false,
             rotation: false,
             scroll: false,
-        };
-
-        super.setUserInterface();
+        });
     }
 
     action(current, options, support) {
@@ -33,9 +32,9 @@ export default class TouchSlider extends Core {
         }
     }
 
-    addEventListeners() {
+    addEventListeners(options, support) {
         // следим за изменением ориентации экрана
-        if (this.support.matchMedia) {
+        if (support.matchMedia) {
             const matchPortrait = matchMedia('(orientation: portrait)');
             const matchLandscape = matchMedia('(orientation: landscape)');
 
@@ -72,7 +71,7 @@ export default class TouchSlider extends Core {
         };
 
         this.shaft.addEventListener('scroll', () => {this.state.scroll = true});
-        this.shaft.addEventListener('scroll', this.debounce(scrollEndHandler, 100));
+        this.shaft.addEventListener('scroll', debounce(scrollEndHandler, 100));
 
         // следим за прикосновением к экрану
         this.shaft.addEventListener('touchstart', () => {this.state.touch = true});
@@ -81,10 +80,12 @@ export default class TouchSlider extends Core {
 
             // для тех случаев, когда браузер не умеет умную прокрутку
             // скролл или таскание прекратились, палец убрали, нужно скорректировать положение слайда
-            if (this.support.scrollSnap === false && this.state.scroll === false) {
+            if (support.scrollSnap === false && this.state.scroll === false) {
                 scrollEndHandler();
             }
         });
+
+        super.addEventListeners.apply(this, arguments);
     }
 
     _setItemWidth() {
