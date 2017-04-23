@@ -1,20 +1,8 @@
 import Core from '../core';
 
 export default class Slider extends Core {
-    setUserInterface() {
-        super.setUserInterface();
-
-        this.options.enableArrows && this.createArrows();
-        this.addEventListeners();
-    }
-
     action(current, options) {
         this.head.style.marginLeft = (-100 * current) + '%';
-    }
-
-    setNavigationState() {
-        super.setNavigationState();
-        this.options.enableArrows && this.setArrowsActivity();
     }
 
     addEventListeners() {

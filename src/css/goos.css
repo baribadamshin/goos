@@ -29,7 +29,10 @@
 /* вспомогательные штуки */
 @import '_animation/goos_animation_off.css';
 @import '_init/goos_init.css';
-@import '_init/_touch/goos_init_touch.css';
+@import '_init/goos_init_touch.css';
+
+/* появились элементы управления */
+@import "_nav/goos_nav_dots.css";
 
 .goos
 {

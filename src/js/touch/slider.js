@@ -2,7 +2,9 @@ import Core from '../core';
 
 export default class TouchSlider extends Core {
     setUserInterface() {
-        this.block.classList.add('goos_init_touch');
+        this._setItemWidth();
+
+        this.classNames.init = 'goos_init_touch';
 
         // состояния взаимодействия пользователя с каруселькой
         this.state = {
@@ -12,19 +14,12 @@ export default class TouchSlider extends Core {
         };
 
         super.setUserInterface();
-        this.addEventListeners();
-    }
-
-    setOptions(options) {
-        super.setOptions(options);
-
-        this.headWidth = parseFloat(getComputedStyle(this.head).getPropertyValue('width'));
     }
 
     action(current, options, support) {
         // если браузер не умеет умную прокрутку, нам нужно самим дотолкать элемент
         if (this.state && support.scrollSnap === false) {
-            const correctScroll = current * this.headWidth;
+            const correctScroll = current * this.itemWidth;
 
             if (correctScroll !== this.shaft.scrollLeft) {
                 // если был поворот экрана, анимации нам не нужны
@@ -51,6 +46,8 @@ export default class TouchSlider extends Core {
                     // в скриптах отключим анимации, они во время поворота все равно не работают
                     this.state.rotation = true;
 
+                    this._setItemWidth();
+
                     // прыжок на нужную позицию без анимации
                     this.setOptions();
 
@@ -70,11 +67,11 @@ export default class TouchSlider extends Core {
             // только если нет касаний к экрану
             if (this.state.touch === false) {
                 // как только мы поменяем значение, сработает action
-                this.current = Math.round(this.shaft.scrollLeft / this.headWidth);
+                this.current = Math.round(this.shaft.scrollLeft / this.itemWidth);
             }
         };
 
-        this.shaft.addEventListener('scroll', () => this.state.scroll = true);
+        this.shaft.addEventListener('scroll', () => {this.state.scroll = true});
         this.shaft.addEventListener('scroll', this.debounce(scrollEndHandler, 100));
 
         // следим за прикосновением к экрану
@@ -88,5 +85,9 @@ export default class TouchSlider extends Core {
                 scrollEndHandler();
             }
         });
+    }
+
+    _setItemWidth() {
+        this.itemWidth = parseFloat(getComputedStyle(this.head).getPropertyValue('width'));
     }
 }

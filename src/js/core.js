@@ -127,12 +127,13 @@ export default class Core {
             init: 'goos_init',
             shaft: 'goos__shaft',
             arrows: {
+                init: 'goos_nav_arrows',
                 base: 'goos__arrow',
                 prev: 'goos__arrow_prev',
-                next: 'goos__arrow_next',
-                off: 'goos__arrow_disabled'
+                next: 'goos__arrow_next'
             },
             dots: {
+                init: 'goos_nav_dots',
                 base: 'goos__dots',
                 item: 'goos__dot',
                 active: 'goos__dot_active'
@@ -223,8 +224,16 @@ export default class Core {
     setUserInterface() {
         this.block.classList.add(this.classNames.init);
 
+        this.options.enableArrows && this.createArrows();
         this._options.enableDots && this.createDotsNavigation();
+
+        this.addEventListeners();
     }
+
+    /**
+     * @abstract
+     */
+    addEventListeners() {}
 
     createArrows() {
         let arrowPrev = document.createElement('button');
@@ -245,12 +254,15 @@ export default class Core {
         this.arrowPrev = this.block.insertBefore(arrowPrev, this.block.firstChild);
 
         this.setArrowsActivity();
+
+        this.block.classList.add(this.classNames.arrows.init);
     }
 
     createDotsNavigation() {
         let dotsContainer = document.createElement('ul');
 
         dotsContainer.classList.add(this.classNames.dots.base);
+
         dotsContainer.addEventListener('click', e => {
             const target = e.target;
 
@@ -265,6 +277,8 @@ export default class Core {
 
         this.setDots();
         this.setActiveDot();
+
+        this.block.classList.add(this.classNames.dots.init);
     }
 
     /**
@@ -279,7 +293,7 @@ export default class Core {
         if (this.dotsContainer) {
             const activeDotClassName = this.classNames.dots.active;
             const dotIndex = Math.round(this.current / this.options.slideBy);
-            const lastActiveDot = this.dotsContainer.querySelector('.' + activeDotClassName);
+            const lastActiveDot = this.dotsContainer.getElementsByClassName(activeDotClassName)[0];
 
             lastActiveDot && lastActiveDot.classList.remove(activeDotClassName);
 
@@ -293,37 +307,30 @@ export default class Core {
             return;
         }
 
-        const arrowDisabledClass = this.classNames.arrows.off;
         const arrowDisabledAttribute = 'disabled';
 
         if (!this._edge) {
             this.arrowPrev.removeAttribute(arrowDisabledAttribute);
-            this.arrowPrev.classList.remove(arrowDisabledClass);
-
             this.arrowNext.removeAttribute(arrowDisabledAttribute);
-            this.arrowNext.classList.remove(arrowDisabledClass);
 
             return true;
         }
 
         if (this._edge === 'start') {
             this.arrowPrev.setAttribute(arrowDisabledAttribute, true);
-            this.arrowPrev.classList.add(arrowDisabledClass);
 
             this.arrowNext.removeAttribute(arrowDisabledAttribute);
-            this.arrowNext.classList.remove(arrowDisabledClass);
         }
 
         if (this._edge === 'end') {
             this.arrowPrev.removeAttribute(arrowDisabledAttribute);
-            this.arrowPrev.classList.remove(arrowDisabledClass);
 
             this.arrowNext.setAttribute(arrowDisabledAttribute, true);
-            this.arrowNext.classList.add(arrowDisabledClass);
         }
     }
 
     setNavigationState() {
+        this.options.enableArrows && this.setArrowsActivity();
         this.options.enableDots && this.setActiveDot();
     }
 
