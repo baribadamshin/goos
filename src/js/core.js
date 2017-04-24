@@ -196,9 +196,7 @@ export default class Core {
         this.options.enableArrows && this.createArrows();
         this.options.enableDots && this.createDotsNavigation();
 
-        this.state = Object.assign({
-            fullscreen: false,
-        }, specific);
+        this.state = Object.assign({fullscreen: false}, specific);
 
         this.addEventListeners(this.options, this.support);
     }
@@ -321,7 +319,6 @@ export default class Core {
         this.options.enableDots && this.setActiveDot();
     }
 }
-
 
 /**
  * @typedef {Object} GoosOptions
