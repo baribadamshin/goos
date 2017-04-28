@@ -217,8 +217,6 @@ export default class Core {
             const target = event.target;
             const classNames = this.classNames;
 
-            this.fullscreen();
-
             // клик по точке в навигации
             if (target.classList.contains(classNames.dots.item)) {
                 const dotIndex = Array.prototype.indexOf.call(this.dotsContainer.children, target);
