@@ -1,4 +1,4 @@
-import debounce from '../utils/debounce';
+import debounce from '../helpers/debounce';
 import Core from '../core';
 
 export default class Slider extends Core {
@@ -6,7 +6,13 @@ export default class Slider extends Core {
         this.head.style.marginLeft = (-100 * current) + '%';
     }
 
-    addEventListeners(options, support) {
+    setUserInterface(specific) {
+        this.options.enableArrows && this.createArrows();
+
+        super.setUserInterface(arguments);
+    }
+
+    addEventListeners(w, options, support) {
         const config = {
             attributes: true,
             attributeOldValue: true,
@@ -27,11 +33,28 @@ export default class Slider extends Core {
             const windowResizeHandler = debounce(this.setOptions.bind(this), 250);
 
             // когда мы включаем адаптивный режим, нам нужно следить за тем чтобы мы не
-            // прокручивали большем элементов чем их видно на экране
-            // т.е был слайдер на 4 элемента с прокруткой по 3; окно уменьшилось, теперь слайдер шириной 2
+            // прокручивали больше элементов чем их видно на экране
+            // т.е был слайдер на 4 элемента с прокруткой по 3; окно уменьшилось — теперь слайдер шириной 2
             // а прокрутка все еще по 3
             // эта информация лежит в контент псевдоэлемента
-            window.addEventListener('resize', windowResizeHandler);
+            w.addEventListener('resize', windowResizeHandler);
+        }
+
+        if (options.enableArrows) {
+            this.block.addEventListener('click', event => {
+                const target = event.target;
+                const classNames = this.classNames;
+
+                // стрелка влево
+                if (target.classList.contains(classNames.arrows.prev)) {
+                    this.prev();
+                }
+
+                // стрелка вправо
+                if (target.classList.contains(classNames.arrows.next)) {
+                    this.next();
+                }
+            });
         }
 
         super.addEventListeners.apply(this, arguments);

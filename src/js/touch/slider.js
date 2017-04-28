@@ -1,10 +1,10 @@
-import debounce from '../utils/debounce';
+import debounce from '../helpers/debounce';
+import animate from '../helpers/animate';
+
 import Core from '../core';
 
 export default class TouchSlider extends Core {
-    setUserInterface() {
-        this._setItemWidth();
-
+    setUserInterface(s) {
         this.classNames.init = 'goos_init_touch';
 
         // передадим состояния взаимодействия пользователя с каруселькой специфичные для тача
@@ -15,24 +15,31 @@ export default class TouchSlider extends Core {
         });
     }
 
+    setOptions(options) {
+        this._setItemWidth();
+
+        super.setOptions.apply(this, arguments)
+    }
+
     action(current, options, support) {
         // если браузер не умеет умную прокрутку, нам нужно самим дотолкать элемент
         if (this.state && support.scrollSnap === false) {
-            const correctScroll = current * this.itemWidth;
+            const correctScroll = Math.round(current * this.itemWidth);
 
             if (correctScroll !== this.shaft.scrollLeft) {
                 // если был поворот экрана, анимации нам не нужны
                 if (this.state.rotation === true) {
                     this.shaft.scrollLeft = correctScroll;
+
                     return;
                 }
 
-                $(this.shaft).animate({scrollLeft: correctScroll});
+                this._animateToSlide(correctScroll);
             }
         }
     }
 
-    addEventListeners(options, support) {
+    addEventListeners(w, options, support) {
         // следим за изменением ориентации экрана
         if (support.matchMedia) {
             const matchPortrait = matchMedia('(orientation: portrait)');
@@ -44,8 +51,6 @@ export default class TouchSlider extends Core {
                     // запомним, что произошел поворот
                     // в скриптах отключим анимации, они во время поворота все равно не работают
                     this.state.rotation = true;
-
-                    this._setItemWidth();
 
                     // прыжок на нужную позицию без анимации
                     this.setOptions();
@@ -90,5 +95,14 @@ export default class TouchSlider extends Core {
 
     _setItemWidth() {
         this.itemWidth = parseFloat(getComputedStyle(this.head).getPropertyValue('width'));
+    }
+
+    _animateToSlide(slidePosition) {
+        const startPosition = this.shaft.scrollLeft;
+        const delta = startPosition - slidePosition;
+
+        animate(progress => {
+            this.shaft.scrollLeft = startPosition - delta * progress;
+        }, this.options.animateSpeed);
     }
 }
