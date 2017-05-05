@@ -1,6 +1,6 @@
 'use strict';
 
-const className = 'goos_fullscreen';
+const FULLSCREEN_CLASS_NAME = 'goos_fullscreen';
 const elementProperties = [
     'fullscreenElement',
     'webkitFullscreenElement',
@@ -15,11 +15,11 @@ const changeEvents = [
 ];
 
 function requestFullscreen() {
-    this.classList.add(className);
+    this.classList.add(FULLSCREEN_CLASS_NAME);
 }
 
 function exitFullscreen() {
-    this.classList.remove(className);
+    this.classList.remove(FULLSCREEN_CLASS_NAME);
 }
 
 /**
@@ -64,7 +64,7 @@ export default (function (d) {
                 d[elementProperties[0]] = container;
             }
 
-            requestMethod.call(container, undefined);
+            requestMethod.call(container);
         },
         exit() {
             if (exitMethod) {

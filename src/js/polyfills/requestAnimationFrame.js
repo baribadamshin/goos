@@ -4,7 +4,7 @@ import performance from './perfomance';
 
 export default (function() {
     const w = window;
-    const requestAnimationFrame = (function () {
+    const requestAnimation = (function () {
         let lastTime = 0;
 
         return callback => {
@@ -22,6 +22,6 @@ export default (function() {
         || w.webkitRequestAnimationFrame
         || w.oRequestAnimationFrame
         || w.msRequestAnimationFrame
-        || requestAnimationFrame;
+        || requestAnimation;
 }());
 

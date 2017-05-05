@@ -31,6 +31,9 @@
 @import '_init/goos_init.css';
 @import '_init/goos_init_touch.css';
 
+/* фуллскрин */
+@import '_fullscreen/goos_fullscreen.css';
+
 /* появились элементы управления */
 @import "_nav/goos_nav_dots.css";
 

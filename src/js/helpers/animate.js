@@ -1,7 +1,7 @@
 'use strict';
 
 import performance from '../polyfills/perfomance';
-import requestAnimationFrame from '../polyfills/requestAnimationFrame';
+import requestAnimation from '../polyfills/requestAnimationFrame';
 
 /**
  *
@@ -12,7 +12,7 @@ import requestAnimationFrame from '../polyfills/requestAnimationFrame';
 export default (draw, duration, easing) => {
     const start = performance.now();
 
-    requestAnimationFrame(function animate(time) {
+    requestAnimation(function animate(time) {
         let timeFraction = (time - start) / duration;
 
         if (timeFraction > 1) {
@@ -24,7 +24,7 @@ export default (draw, duration, easing) => {
         draw(progress);
 
         if (timeFraction < 1) {
-            requestAnimationFrame(animate);
+            requestAnimation(animate);
         }
     });
 }

@@ -45,7 +45,7 @@ export default class Core {
         const options = this._options;
 
         return {
-            animateSpeed: options.animateSpeed,
+            animateDuration: options.animateDuration,
             allowFullscreen: options.allowFullscreen,
             enableArrows: options.enableArrows,
             enableDots: options.enableDots,
@@ -63,7 +63,7 @@ export default class Core {
      * @return {number}
      */
     get screens() {
-        return Math.ceil(this.items.length / this.options.slideBy);
+        return Math.floor(this.items.length / this.options.slideBy);
     }
 
     /**
@@ -129,7 +129,7 @@ export default class Core {
             enableArrows: false,
             enableDots: false,
             allowFullscreen: true,
-            animateSpeed: 250,
+            animateDuration: 250,
         };
 
         // опции которые мы пробрасываем из стилей
@@ -191,18 +191,12 @@ export default class Core {
         this._edge = false;
     }
 
-    /**
-     *
-     * @param {Object} specific
-     */
-    setUserInterface(specific = {}) {
+    setUserInterface() {
         this.block.classList.add(this.classNames.init);
 
         this.options.enableDots && this.createDotsNavigation();
 
-        this.state = Object.assign({fullscreen: false}, specific);
-
-        this.addEventListeners(window, this.options, this.support);
+        this._addEventListeners(window, this.options, this.support);
     }
 
     /**
@@ -210,9 +204,9 @@ export default class Core {
      * @param {Window} w
      * @param {object} options
      * @param {object} support
-     * @public
+     * @protected
      */
-    addEventListeners(w, options, support) {
+    _addEventListeners(w, options, support) {
         this.block.addEventListener('click', event => {
             const target = event.target;
             const classNames = this.classNames;
@@ -220,8 +214,11 @@ export default class Core {
             // клик по точке в навигации
             if (target.classList.contains(classNames.dots.item)) {
                 const dotIndex = Array.prototype.indexOf.call(this.dotsContainer.children, target);
+                const screenIndex = Math.round(this.items.length / this.screens * dotIndex);
 
-                this.current = Math.round(this.items.length / this.screens * dotIndex);
+                if (this.current !== screenIndex) {
+                    this.current = screenIndex;
+                }
             }
         });
 
@@ -257,10 +254,10 @@ export default class Core {
      */
     setDots() {
         const container = this.dotsContainer;
-        const dotsCount = this.screens + 1;
+        const dotsCount = this.screens;
 
         if (container && container.children.length !== dotsCount) {
-            container.innerHTML = new Array(dotsCount).join(`<li class="${this.classNames.dots.item}" />`);
+            container.innerHTML = new Array(dotsCount + 1).join(`<li class="${this.classNames.dots.item}" />`);
         }
 
         this.setActiveDot();
@@ -268,17 +265,19 @@ export default class Core {
 
     // подсвечивает нужную точку
     setActiveDot() {
-        if (!this.dotsContainer) {
+        const container = this.dotsContainer;
+
+        // если нет контейнера — нет точек
+        if (!container) {
             return;
         }
 
         const activeDotClassName = this.classNames.dots.active;
         const dotIndex = Math.round(this.current / this.options.slideBy);
-        const currentActiveDot = this.dotsContainer.getElementsByClassName(activeDotClassName)[0];
+        const currentActiveDot = container.getElementsByClassName(activeDotClassName)[0];
 
         currentActiveDot && currentActiveDot.classList.remove(activeDotClassName);
-
-        this.dotsContainer.children[dotIndex].classList.add(activeDotClassName);
+        container.children[dotIndex].classList.add(activeDotClassName);
     }
 
     // меняет активное состояние стрелок
@@ -318,16 +317,8 @@ export default class Core {
     // он должнен быть запущен в ответ на действие пользователя
     fullscreen() {
         if (this.options.allowFullscreen === true) {
-            this.state.fullscreen = true;
-
             fullScreenApi.request(this.block);
         }
-    }
-
-    exitFromFullscreen() {
-        this.state.fullscreen = false;
-
-        fullScreenApi.exit();
     }
 }
 

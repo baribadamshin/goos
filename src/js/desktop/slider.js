@@ -12,7 +12,7 @@ export default class Slider extends Core {
         super.setUserInterface(arguments);
     }
 
-    addEventListeners(w, options, support) {
+    _addEventListeners(w, options, support) {
         const config = {
             attributes: true,
             attributeOldValue: true,
@@ -57,6 +57,6 @@ export default class Slider extends Core {
             });
         }
 
-        super.addEventListeners.apply(this, arguments);
+        super._addEventListeners.apply(this, arguments);
     }
 }

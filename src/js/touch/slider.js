@@ -4,42 +4,109 @@ import animate from '../helpers/animate';
 import Core from '../core';
 
 export default class TouchSlider extends Core {
-    setUserInterface(s) {
+    constructor(container, options) {
+        super(container, options);
+
+        this.touched = false;
+        this.rotation = false;
+        this.scrolling = false;
+    }
+
+    setUserInterface() {
         this.classNames.init = 'goos_init_touch';
 
-        // передадим состояния взаимодействия пользователя с каруселькой специфичные для тача
-        super.setUserInterface({
-            touch: false,
-            rotation: false,
-            scroll: false,
-        });
+        // передадим состояния взаимодействия с каруселькой специфичные для тача
+        super.setUserInterface();
     }
 
     setOptions(options) {
-        this._setItemWidth();
+        this._setSlideWidth();
 
-        super.setOptions.apply(this, arguments)
+        super.setOptions(options);
     }
 
     action(current, options, support) {
-        // если браузер не умеет умную прокрутку, нам нужно самим дотолкать элемент
-        if (this.state && support.scrollSnap === false) {
-            const correctScroll = Math.round(current * this.itemWidth);
+        const correctScroll = Math.round(current * this.slideWidth);
 
-            if (correctScroll !== this.shaft.scrollLeft) {
-                // если был поворот экрана, анимации нам не нужны
-                if (this.state.rotation === true) {
-                    this.shaft.scrollLeft = correctScroll;
+        if (correctScroll !== this.shaft.scrollLeft) {
+            // если был поворот экрана, анимации нам не нужны
+            if (this.rotation === true) {
+                this.shaft.scrollLeft = correctScroll;
 
-                    return;
-                }
-
-                this._animateToSlide(correctScroll);
+                return;
             }
+
+            this._animateToSlide(correctScroll);
         }
     }
 
-    addEventListeners(w, options, support) {
+    _addEventListeners(w, options, support) {
+        this._rotationHandler(support);
+        this._scrollingHandler();
+        this._doubleTapHandler();
+        this._pinchHandler();
+
+        super._addEventListeners.apply(this, arguments);
+    }
+
+    _setSlideWidth() {
+        this.slideWidth = parseFloat(getComputedStyle(this.head).getPropertyValue('width'));
+    }
+
+    _animateToSlide(slidePosition) {
+        const startPosition = this.shaft.scrollLeft;
+        const delta = startPosition - slidePosition;
+
+        animate(
+            progress => {this.shaft.scrollLeft = startPosition - delta * progress},
+            this.options.animateDuration,
+        );
+    }
+
+    _doubleTapHandler() {
+        let tapedTwice = false;
+
+        // браузеры не разрешают переходить в фуллскрин с другого события
+        // поэтому двойной тап будем определять по клику
+        this.shaft.addEventListener('click', () => {
+            if (tapedTwice === false) {
+                tapedTwice = true;
+                setTimeout(() => {tapedTwice = false}, 300);
+                return;
+            }
+
+            // фулскрин по двойному тапу
+            this.fullscreen();
+        });
+    }
+
+    _scrollingHandler() {
+        const shaft = this.shaft;
+        const scrollEndHandler = () => {
+            this.scrolling = false;
+
+            // только если нет касаний к экрану
+            if (this.touched === false) {
+                // как только мы поменяем значение, сработает action
+                this.current = Math.round(shaft.scrollLeft / this.slideWidth);
+            }
+        };
+
+        shaft.addEventListener('scroll', () => {this.scrolling = true});
+        shaft.addEventListener('scroll', debounce(scrollEndHandler, 100));
+
+        shaft.addEventListener('touchstart', () => {this.touched = true});
+        shaft.addEventListener('touchend', () => {
+            this.touched = false;
+
+            // скролл или таскание прекратились, палец убрали
+            if (this.scrolling === false) {
+                scrollEndHandler();
+            }
+        });
+    }
+
+    _rotationHandler(support) {
         // следим за изменением ориентации экрана
         if (support.matchMedia) {
             const matchPortrait = matchMedia('(orientation: portrait)');
@@ -49,60 +116,32 @@ export default class TouchSlider extends Core {
             const orientationChangeHandler = query => {
                 if (query.matches === true) {
                     // запомним, что произошел поворот
-                    // в скриптах отключим анимации, они во время поворота все равно не работают
-                    this.state.rotation = true;
+                    // потом мы сможем свдинуть слайды без анимации зная, что этот сдвиг необходим из-за поворота
+                    // во время поворота анимации все равно не работают
+                    this.rotation = true;
 
-                    // прыжок на нужную позицию без анимации
+                    // карусель разберется, что нужно сделать
                     this.setOptions();
 
-                    this.state.rotation = false;
+                    this.rotation = false;
                 }
             };
 
             matchPortrait.addListener(orientationChangeHandler);
             matchLandscape.addListener(orientationChangeHandler);
         }
-
-        // следим за скроллом
-        // после скрола нам нужно поменять значение текущего активного элемента
-        const scrollEndHandler = () => {
-            this.state.scroll = false;
-
-            // только если нет касаний к экрану
-            if (this.state.touch === false) {
-                // как только мы поменяем значение, сработает action
-                this.current = Math.round(this.shaft.scrollLeft / this.itemWidth);
-            }
-        };
-
-        this.shaft.addEventListener('scroll', () => {this.state.scroll = true});
-        this.shaft.addEventListener('scroll', debounce(scrollEndHandler, 100));
-
-        // следим за прикосновением к экрану
-        this.shaft.addEventListener('touchstart', () => {this.state.touch = true});
-        this.shaft.addEventListener('touchend', () => {
-            this.state.touch = false;
-
-            // для тех случаев, когда браузер не умеет умную прокрутку
-            // скролл или таскание прекратились, палец убрали, нужно скорректировать положение слайда
-            if (support.scrollSnap === false && this.state.scroll === false) {
-                scrollEndHandler();
-            }
-        });
-
-        super.addEventListeners.apply(this, arguments);
     }
 
-    _setItemWidth() {
-        this.itemWidth = parseFloat(getComputedStyle(this.head).getPropertyValue('width'));
-    }
+    _pinchHandler() {
+        /*this.shaft.addEventListener('gesturechange', function(e) {
+            console.log(e);
 
-    _animateToSlide(slidePosition) {
-        const startPosition = this.shaft.scrollLeft;
-        const delta = startPosition - slidePosition;
-
-        animate(progress => {
-            this.shaft.scrollLeft = startPosition - delta * progress;
-        }, this.options.animateSpeed);
+            if (e.scale < 1.0) {
+                // User moved fingers closer together
+            } else if (e.scale > 1.0) {
+                console.log(11111);
+                // User moved fingers further apart
+            }
+        }, false);*/
     }
 }
