@@ -42,8 +42,6 @@ export default class Slider extends Core {
                 const target = event.target;
                 const classNames = this.classNames;
 
-                this.fullscreen();
-
                 // стрелка влево
                 if (target.classList.contains(classNames.arrows.prev)) {
                     this.prev();
