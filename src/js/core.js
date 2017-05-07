@@ -3,6 +3,9 @@
 import getBrowserSupportFeatures from './utils/getBrowserSupportFeatures';
 import getOptionsFromClassList from './utils/getOptionsFromClassList'
 
+import fullScreenApi from './helpers/fullscreen';
+import createArrow from './helpers/createArrow';
+
 export default class Core {
     constructor(container, options) {
         if (container instanceof HTMLElement === false) {
@@ -41,12 +44,13 @@ export default class Core {
         const options = this._options;
 
         return {
-            size: options.size,
-            slideBy: options.slideBy,
+            animateDuration: options.animateDuration,
+            allowFullscreen: options.allowFullscreen,
             enableArrows: options.enableArrows,
             enableDots: options.enableDots,
-            allowFullscreen: options.allowFullscreen,
             responsive: options.responsive,
+            size: options.size,
+            slideBy: options.slideBy,
         }
     }
 
@@ -58,7 +62,7 @@ export default class Core {
      * @return {number}
      */
     get screens() {
-        return Math.ceil(this.items.length / this.options.slideBy);
+        return Math.floor(this.items.length / this._options.slideBy);
     }
 
     /**
@@ -66,7 +70,7 @@ export default class Core {
      *
      * @abstract
      * @param {number} current
-     * @param {Object} options
+     * @param {GoosOptions} options
      * @param {Object} support
      * @param {HTMLCollection} items
      */
@@ -91,7 +95,6 @@ export default class Core {
             init: 'goos_init',
             shaft: 'goos__shaft',
             arrows: {
-                init: 'goos_nav_arrows',
                 base: 'goos__arrow',
                 prev: 'goos__arrow_prev',
                 next: 'goos__arrow_next'
@@ -108,6 +111,8 @@ export default class Core {
         this.shaft = this.block.getElementsByClassName(this.classNames.shaft)[0];
         this.items = this.shaft.children;
         this.head = this.items[0];
+
+        this.dotsContainer = null;
     }
 
     /**
@@ -121,17 +126,20 @@ export default class Core {
         const defaultOptions = {
             current: 0,
             size: optionsFromClassNames.size || 1,
-            slideBy: (options && options.slideBy) || optionsFromClassNames.size,
+            slideBy: options.slideBy || optionsFromClassNames.size,
             enableArrows: false,
             enableDots: false,
             allowFullscreen: true,
+            animateDuration: 250,
         };
+
+        const allowFullscreen = options.allowFullscreen || (this._options && this._options.allowFullscreen);
 
         // опции которые мы пробрасываем из стилей
         let styleOptions = {};
 
-        if (optionsFromClassNames.responsive) {
-            let size = getComputedStyle(this.block, '::before').getPropertyValue('content').replace(/'/g, '');
+        if (optionsFromClassNames.responsive || allowFullscreen) {
+            let size = getComputedStyle(this.block, ':before').getPropertyValue('content').replace(/'/g, '');
             // size !== 'none' for FF
             size = size.length && size !== 'none' && parseInt(JSON.parse(size));
 
@@ -186,74 +194,60 @@ export default class Core {
         this._edge = false;
     }
 
-    /**
-     *
-     * @param {Object} specific
-     */
-    setUserInterface(specific = {}) {
+    setUserInterface() {
         this.block.classList.add(this.classNames.init);
 
-        this.options.enableArrows && this.createArrows();
-        this.options.enableDots && this.createDotsNavigation();
+        this._options.enableDots && this.createDotsNavigation();
 
-        this.state = Object.assign({fullscreen: false}, specific);
-
-        this.addEventListeners(this.options, this.support);
+        this._addEventListeners(window, this.block, this.options, this.support);
     }
 
     /**
      *
+     * @param {Window} w
      * @param {object} options
      * @param {object} support
-     * @public
+     * @param {HTMLElement} container
+     * @protected
      */
-    addEventListeners(options, support) {
-        if (options.allowFullscreen && support.fullScreen.changeEventType) {
-            this.block.addEventListener(support.fullScreen.changeEventType, () => {
-                this.state.fullscreen = !!document[support.fullScreen.elementProperty];
+    _addEventListeners(w, container, options, support) {
+        container.addEventListener('click', event => {
+            const target = event.target;
+            const classNames = this.classNames;
 
-                console.log(this.state);
+            // клик по точке в навигации
+            if (target.classList.contains(classNames.dots.item)) {
+                const dotIndex = Array.prototype.indexOf.call(this.dotsContainer.children, target);
+                const screenIndex = Math.round(this.items.length / this.screens * dotIndex);
+
+                if (this.current !== screenIndex) {
+                    this.current = screenIndex;
+                }
+            }
+        });
+
+        if (options.allowFullscreen) {
+            container.addEventListener(fullScreenApi.changeEventType, () => {
+                this.setOptions();
             });
         }
     }
 
     createArrows() {
-        const arrowPrev = document.createElement('button');
+        const arrowBaseClass = this.classNames.arrows.base;
+        const prevArrowClassName = `${arrowBaseClass} ${this.classNames.arrows.prev}`;
+        const nextArrowClassName = `${arrowBaseClass} ${this.classNames.arrows.next}`;
 
-        arrowPrev.innerHTML = '<i/>';
-
-        const arrowNext = arrowPrev.cloneNode(true);
-
-        arrowNext.className = arrowPrev.className = this.classNames.arrows.base;
-
-        arrowPrev.classList.add(this.classNames.arrows.prev);
-        arrowNext.classList.add(this.classNames.arrows.next);
-
-        arrowPrev.addEventListener('click', this.prev.bind(this));
-        arrowNext.addEventListener('click', this.next.bind(this));
-
-        this.arrowNext = this.block.insertBefore(arrowNext, this.block.firstChild);
-        this.arrowPrev = this.block.insertBefore(arrowPrev, this.block.firstChild);
+        this.arrowNext = createArrow(this.block, nextArrowClassName);
+        this.arrowPrev = createArrow(this.block, prevArrowClassName);
 
         this.setArrowsActivity();
-
-        this.block.classList.add(this.classNames.arrows.init);
     }
 
     createDotsNavigation() {
         const dotsContainer = document.createElement('ul');
 
-        dotsContainer.classList.add(this.classNames.dots.base);
-
-        dotsContainer.addEventListener('click', e => {
-            const target = e.target;
-
-            if (target.classList.contains(this.classNames.dots.item)) {
-                const dotIndex = Array.prototype.indexOf.call(dotsContainer.children, target);
-
-                this.current = Math.round(this.items.length / this.screens * dotIndex);
-            }
-        });
+        dotsContainer.className = this.classNames.dots.base;
 
         this.dotsContainer = this.block.appendChild(dotsContainer);
 
@@ -263,27 +257,30 @@ export default class Core {
     }
 
     /**
-     * Рисует нужное количество точек в dotsContainer
+     * Рисует, если это необходимо, нужное количество точек в dotsContainer
+     * и отмечает точку соответствующую current
      */
     setDots() {
-        this.dotsContainer.innerHTML = new Array(this.screens + 1).join(`<li class="${this.classNames.dots.item}" />`);
+        const container = this.dotsContainer;
+        const dotsCount = this.screens;
+
+        if (container && container.children.length !== dotsCount) {
+            container.innerHTML = new Array(dotsCount + 1).join(`<li class="${this.classNames.dots.item}"></li>`);
+        }
 
         this.setActiveDot();
     }
 
     // подсвечивает нужную точку
     setActiveDot() {
-        if (!this.dotsContainer) {
-            return;
-        }
-
+        const container = this.dotsContainer;
         const activeDotClassName = this.classNames.dots.active;
-        const dotIndex = Math.round(this.current / this.options.slideBy);
-        const currentActiveDot = this.dotsContainer.getElementsByClassName(activeDotClassName)[0];
+        const dotIndex = Math.round(this.current / this._options.slideBy);
+
+        const currentActiveDot = container.getElementsByClassName(activeDotClassName)[0];
 
         currentActiveDot && currentActiveDot.classList.remove(activeDotClassName);
-
-        this.dotsContainer.children[dotIndex].classList.add(activeDotClassName);
+        container.children[dotIndex].classList.add(activeDotClassName);
     }
 
     // меняет активное состояние стрелок
@@ -315,15 +312,26 @@ export default class Core {
     }
 
     setNavigationState() {
-        this.options.enableArrows && this.setArrowsActivity();
-        this.options.enableDots && this.setActiveDot();
+        this._options.enableArrows && this.setArrowsActivity();
+        this._options.enableDots && this.dotsContainer && this.setDots();
+    }
+
+    // в настольном сафари нельзя просто взять и запустить фулскрин
+    // он должнен быть запущен в ответ на действие пользователя
+    fullscreen() {
+        if (this._options.allowFullscreen === true) {
+            fullScreenApi.request(this.block);
+        }
     }
 }
 
 /**
  * @typedef {Object} GoosOptions
+ * @property {number} animateSpeed
+ * @property {boolean} allowFullscreen
+ * @property {boolean} enableArrows
+ * @property {boolean} enableDots
+ * @property {boolean} responsive
  * @property {number} size
  * @property {number} slideBy
- * @property {boolean} enableArrows
- * @property {boolean} responsive
  */

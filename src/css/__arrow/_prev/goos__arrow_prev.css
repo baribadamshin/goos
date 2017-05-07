@@ -7,27 +7,30 @@
 
 .goos__arrow_prev i
 {
-    border-width: 2px 0 0 2px;
     transform: rotate(-45deg);
+
+    border-width: 2px 0 0 2px;
 }
 
 .goos__arrow_prev i::before
 {
-    left: 0;
     top: -1px;
+    left: 0;
 
-    transform-origin: 0;
     transform: rotate(45deg);
+    transform-origin: 0;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1100px)
+{
     .goos__arrow_prev
     {
         left: 0;
     }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 800px)
+{
     .goos__arrow_prev
     {
         left: 30px;

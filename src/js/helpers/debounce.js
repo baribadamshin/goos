@@ -8,10 +8,10 @@
  * @param {number} wait
  * @returns {function()}
  */
-export default function (callback, wait) {
+export default (callback, wait) => {
     let timeoutId;
 
-    return function () {
+    return () => {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(callback, wait);
     };
