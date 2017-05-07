@@ -4,7 +4,7 @@
  * @param {Window} w
  * @returns {boolean}
  */
-export default function (w) {
+export default w => {
     let scrollSnapProperty = 'scroll-snap-type: mandatory';
 
     scrollSnapProperty = [

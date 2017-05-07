@@ -34,7 +34,7 @@
     content: '';
     transition: all .1s;
 
-    opacity: .3;
+    opacity: .45;
     border: 1px solid currentColor;
     border-radius: 50%;
 }

@@ -1,5 +1,6 @@
 .goos__arrow:disabled
 {
-    opacity: .2;
     pointer-events: none;
+
+    opacity: .2;
 }

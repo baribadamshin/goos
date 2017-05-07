@@ -5,7 +5,7 @@
  * @param {DOMTokenList} classList
  * @returns {OptionsFromBlockClassList}
  */
-export default function (classList) {
+export default classList => {
     const responsive = classList.contains('goos_responsive');
     const size = Number((classList.toString().match(/goos_size_(\d+)/) || [])[1] || 1);
 
