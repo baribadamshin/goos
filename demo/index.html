@@ -4,17 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
 
-    <script src="../dist/goos.min.js"></script>
-    <link rel="stylesheet" href="../dist/goos.min.css" />
+    <script src="https://unpkg.com/goos@latest/dist/goos.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="https://unpkg.com/goos@latest/dist/goos.min.css" />
     <link rel="stylesheet" href="style.css" />
 
     <title>Good one Slider</title>
 </head>
 <body>
-    <div class="goos goos_margin example0">
+<div class="goos goos_size_3 goos_margin example0">
         <ul class="goos__shaft">
-            <li class="goos__item"><div class="snippet">1</div></li>
-            <!--ghbdtn-->
+            <li class="goos__item"><div class="snippet">1</div>
             <li class="goos__item"><div class="snippet">2</div>
             <li class="goos__item"><div class="snippet">3</div>
             <li class="goos__item"><div class="snippet">4</div>
@@ -935,31 +934,23 @@
 
 
 
-    <script>
-        if (/eruda=true/.test(window.location)) {
+    <script>/*
             var scriptTag = document.createElement('script');
 
             scriptTag.src = '../node_modules/eruda/eruda.min.js';
             scriptTag.onload = function () {
-                eruda.init({
-                    tool: ['console']
-                });
+                //eruda.init();
 
-                goos(document.getElementsByClassName('example2'), {enableArrows: true});
+
+                //goos(document.getElementsByClassName('goos')[0], {enableDots: true});
             };
 
-            document.head.insertBefore(scriptTag, document.head.firstChild);
-        } else {
-            goos(document.querySelectorAll('.example0'), {
-                enableArrows: true,
-                enableDots: true
-            });
+            document.head.insertBefore(scriptTag, document.head.firstChild);*/
 
-            goos(document.getElementsByClassName('example2'), {
+            goos(document.getElementsByClassName('goos')[0], {
+                enableDots: true,
                 enableArrows: true,
-                enableDots: true
             });
-        }
 
     </script>
 </body>

@@ -14,14 +14,10 @@
     transform: translateZ(0);
 
     flex-wrap: nowrap;
-
     scroll-snap-type: mandatory;
     scroll-snap-points-x: repeat(100%);
-
     scroll-behavior: smooth;
-
     -webkit-overflow-scrolling: touch;
             overflow-scrolling: touch;
-
     touch-action: pan-x pinch-zoom double-tap-zoom;
 }

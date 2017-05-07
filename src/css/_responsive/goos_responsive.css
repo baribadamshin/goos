@@ -45,6 +45,6 @@
     .goos_responsive.goos_margin .goos__shaft
     {
         margin-right: -7px; /* calc(-14px/2) */
-        padding-right: 50%
+        padding-right: 50%;
     }
 }

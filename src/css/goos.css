@@ -8,9 +8,9 @@
 @import '__arrow/_next/goos__arrow_next.css';
 
 /* точки */
-@import "__dots/goos__dots.css";
-@import "__dot/goos__dot.css";
-@import "__dot/_active/goos__dot_active.css";
+@import '__dots/goos__dots.css';
+@import '__dot/goos__dot.css';
+@import '__dot/_active/goos__dot_active.css';
 
 /* размеры */
 @import '_size/goos_size_2.css';
@@ -35,9 +35,19 @@
 @import '_fullscreen/goos_fullscreen.css';
 
 /* появились элементы управления */
-@import "_nav/goos_nav_dots.css";
+@import '_nav/goos_nav_dots.css';
 
 .goos
 {
     position: relative;
+}
+
+.goos::before
+{
+    position: absolute;
+
+    visibility: hidden;
+
+    width: 0;
+    height: 0;
 }

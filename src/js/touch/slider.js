@@ -15,7 +15,6 @@ export default class TouchSlider extends Core {
     setUserInterface() {
         this.classNames.init = 'goos_init_touch';
 
-        // передадим состояния взаимодействия с каруселькой специфичные для тача
         super.setUserInterface();
     }
 
@@ -25,11 +24,19 @@ export default class TouchSlider extends Core {
         super.setOptions(options);
     }
 
-    action(current, options, support) {
+    /**
+     * @public
+     * @param {number} current
+     * @param {GoosOptions} options
+     * @param {Object} support
+     * @param {HTMLCollection} items
+     */
+    action(current, options, support, items) {
         const correctScroll = Math.round(current * this.slideWidth);
 
-        if (correctScroll !== this.shaft.scrollLeft) {
-            // если был поворот экрана, анимации нам не нужны
+        if (support.scrollSnap === false && correctScroll !== this.shaft.scrollLeft) {
+            // while browser doing rotation our animations is not working
+            // that's why we immediately change scroll without animations
             if (this.rotation === true) {
                 this.shaft.scrollLeft = correctScroll;
 
@@ -40,8 +47,8 @@ export default class TouchSlider extends Core {
         }
     }
 
-    _addEventListeners(w, options, support) {
-        this._rotationHandler(support);
+    _addEventListeners(w, container, options, support) {
+        this._rotationHandler(w, support);
         this._scrollingHandler();
         this._doubleTapHandler();
         this._pinchHandler();
@@ -66,16 +73,15 @@ export default class TouchSlider extends Core {
     _doubleTapHandler() {
         let tapedTwice = false;
 
-        // браузеры не разрешают переходить в фуллскрин с другого события
-        // поэтому двойной тап будем определять по клику
-        this.shaft.addEventListener('click', () => {
+        this.shaft.addEventListener('touchend', event => {
             if (tapedTwice === false) {
                 tapedTwice = true;
                 setTimeout(() => {tapedTwice = false}, 300);
                 return;
             }
 
-            // фулскрин по двойному тапу
+            event.preventDefault();
+
             this.fullscreen();
         });
     }
@@ -93,7 +99,7 @@ export default class TouchSlider extends Core {
         };
 
         shaft.addEventListener('scroll', () => {this.scrolling = true});
-        shaft.addEventListener('scroll', debounce(scrollEndHandler, 100));
+        shaft.addEventListener('scroll', debounce(scrollEndHandler, 50));
 
         shaft.addEventListener('touchstart', () => {this.touched = true});
         shaft.addEventListener('touchend', () => {
@@ -106,11 +112,11 @@ export default class TouchSlider extends Core {
         });
     }
 
-    _rotationHandler(support) {
-        // следим за изменением ориентации экрана
+    _rotationHandler(w, support) {
+        // more flexible way to detect change of orientation
         if (support.matchMedia) {
-            const matchPortrait = matchMedia('(orientation: portrait)');
-            const matchLandscape = matchMedia('(orientation: landscape)');
+            const matchPortrait = w.matchMedia('(orientation: portrait)');
+            const matchLandscape = w.matchMedia('(orientation: landscape)');
 
             // реагирует на поворот экрана
             const orientationChangeHandler = query => {
@@ -129,19 +135,10 @@ export default class TouchSlider extends Core {
 
             matchPortrait.addListener(orientationChangeHandler);
             matchLandscape.addListener(orientationChangeHandler);
+        } else {
+            w.addEventListener('orientationchange', this.setOptions.bind(this));
         }
     }
 
-    _pinchHandler() {
-        /*this.shaft.addEventListener('gesturechange', function(e) {
-            console.log(e);
-
-            if (e.scale < 1.0) {
-                // User moved fingers closer together
-            } else if (e.scale > 1.0) {
-                console.log(11111);
-                // User moved fingers further apart
-            }
-        }, false);*/
-    }
+    _pinchHandler() {}
 }

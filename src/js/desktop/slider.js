@@ -12,7 +12,7 @@ export default class Slider extends Core {
         super.setUserInterface(arguments);
     }
 
-    _addEventListeners(w, options, support) {
+    _addEventListeners(w, container, options, support) {
         const config = {
             attributes: true,
             attributeOldValue: true,
@@ -26,24 +26,23 @@ export default class Slider extends Core {
                 this.setOptions();
             });
 
-            observer.observe(this.block, config);
+            observer.observe(container, config);
         }
 
         if (options.responsive) {
-            const windowResizeHandler = debounce(this.setOptions.bind(this), 250);
-
             // когда мы включаем адаптивный режим, нам нужно следить за тем чтобы мы не
             // прокручивали больше элементов чем их видно на экране
             // т.е был слайдер на 4 элемента с прокруткой по 3; окно уменьшилось — теперь слайдер шириной 2
             // а прокрутка все еще по 3
-            // эта информация лежит в контент псевдоэлемента
-            w.addEventListener('resize', windowResizeHandler);
+            w.addEventListener('resize', debounce(this.setOptions.bind(this), 250));
         }
 
         if (options.enableArrows) {
-            this.block.addEventListener('click', event => {
+            container.addEventListener('click', event => {
                 const target = event.target;
                 const classNames = this.classNames;
+
+                this.fullscreen();
 
                 // стрелка влево
                 if (target.classList.contains(classNames.arrows.prev)) {

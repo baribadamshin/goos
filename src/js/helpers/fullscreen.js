@@ -14,35 +14,47 @@ const changeEvents = [
     'MSFullscreenChange'
 ];
 
-function requestFullscreen() {
+function requestFullscreen(eventName) {
     this.classList.add(FULLSCREEN_CLASS_NAME);
+
+    this.dispatchEvent(new CustomEvent(eventName));
 }
 
-function exitFullscreen() {
+function exitFullscreen(eventName) {
     this.classList.remove(FULLSCREEN_CLASS_NAME);
+
+    this.dispatchEvent(new CustomEvent(eventName));
 }
 
 /**
  * @return {fullScreenApi}
  */
-export default (function (d) {
+export default (function (w, d) {
+    let elementProperty = elementProperties[0];
     let changeEventType = 'fullscreenchange';
+    let requestMethod;
+    let exitMethod;
+
     const element = d.createElement('div');
 
-    const requestMethod = element.requestFullscreen
-        || element.webkitRequestFullScreen
-        || element.webkitRequestFullscreen
-        || element.mozRequestFullScreen
-        || element.msRequestFullscreen
-        || requestFullscreen;
+    // UC browsers full screen mode little bit terrible, better we will use fallback
+    if (/ucbrowser/i.test(w.navigator.userAgent) === true) {
+        requestMethod = requestFullscreen;
+    } else {
+        requestMethod = element.requestFullscreen
+            || element.webkitRequestFullScreen
+            || element.webkitRequestFullscreen
+            || element.mozRequestFullScreen
+            || element.msRequestFullscreen
+            || requestFullscreen;
 
-    const exitMethod = d.exitFullscreen
-        || d.cancelFullScreen
-        || d.webkitExitFullscreen
-        || d.webkitCancelFullScreen
-        || d.mozCancelFullScreen
-        || d.msExitFullscreen;
-
+        exitMethod = d.exitFullscreen
+            || d.cancelFullScreen
+            || d.webkitExitFullscreen
+            || d.webkitCancelFullScreen
+            || d.mozCancelFullScreen
+            || d.msExitFullscreen;
+    }
 
     changeEvents.forEach(eventType => {
         if (`on${eventType}` in d) {
@@ -50,7 +62,7 @@ export default (function (d) {
         }
     });
 
-    let elementProperty;
+
     elementProperties.forEach(property => {
         if (property in d) {
             elementProperty = property;
@@ -58,13 +70,14 @@ export default (function (d) {
     });
 
     return {
+        currentFullScreenElement: null,
         changeEventType,
         request(container) {
-            if (!elementProperty) {
-                d[elementProperties[0]] = container;
-            }
+            requestMethod && requestMethod.call(container, changeEventType);
 
-            requestMethod.call(container);
+            if (!d[elementProperty]) {
+                this.currentFullScreenElement = container;
+            }
         },
         exit() {
             if (exitMethod) {
@@ -72,10 +85,11 @@ export default (function (d) {
                 return;
             }
 
-            exitFullscreen.call(d[elementProperties[0]]);
+            exitFullscreen.call(d[elementProperty] || this.currentFullScreenElement, changeEventType);
+            this.currentFullScreenElement = null;
         }
     };
-}(document));
+}(window, document));
 
 /**
  * @typedef {Object} fullScreenApi

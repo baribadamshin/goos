@@ -5,7 +5,6 @@ import getOptionsFromClassList from './utils/getOptionsFromClassList'
 
 import fullScreenApi from './helpers/fullscreen';
 import createArrow from './helpers/createArrow';
-import createDotsContainer from './helpers/createDotsContainer';
 
 export default class Core {
     constructor(container, options) {
@@ -63,7 +62,7 @@ export default class Core {
      * @return {number}
      */
     get screens() {
-        return Math.floor(this.items.length / this.options.slideBy);
+        return Math.floor(this.items.length / this._options.slideBy);
     }
 
     /**
@@ -112,6 +111,8 @@ export default class Core {
         this.shaft = this.block.getElementsByClassName(this.classNames.shaft)[0];
         this.items = this.shaft.children;
         this.head = this.items[0];
+
+        this.dotsContainer = null;
     }
 
     /**
@@ -125,18 +126,20 @@ export default class Core {
         const defaultOptions = {
             current: 0,
             size: optionsFromClassNames.size || 1,
-            slideBy: (options && options.slideBy) || optionsFromClassNames.size,
+            slideBy: options.slideBy || optionsFromClassNames.size,
             enableArrows: false,
             enableDots: false,
             allowFullscreen: true,
             animateDuration: 250,
         };
 
+        const allowFullscreen = options.allowFullscreen || (this._options && this._options.allowFullscreen);
+
         // опции которые мы пробрасываем из стилей
         let styleOptions = {};
 
-        if (optionsFromClassNames.responsive) {
-            let size = getComputedStyle(this.block, '::before').getPropertyValue('content').replace(/'/g, '');
+        if (optionsFromClassNames.responsive || allowFullscreen) {
+            let size = getComputedStyle(this.block, ':before').getPropertyValue('content').replace(/'/g, '');
             // size !== 'none' for FF
             size = size.length && size !== 'none' && parseInt(JSON.parse(size));
 
@@ -194,9 +197,9 @@ export default class Core {
     setUserInterface() {
         this.block.classList.add(this.classNames.init);
 
-        this.options.enableDots && this.createDotsNavigation();
+        this._options.enableDots && this.createDotsNavigation();
 
-        this._addEventListeners(window, this.options, this.support);
+        this._addEventListeners(window, this.block, this.options, this.support);
     }
 
     /**
@@ -204,10 +207,11 @@ export default class Core {
      * @param {Window} w
      * @param {object} options
      * @param {object} support
+     * @param {HTMLElement} container
      * @protected
      */
-    _addEventListeners(w, options, support) {
-        this.block.addEventListener('click', event => {
+    _addEventListeners(w, container, options, support) {
+        container.addEventListener('click', event => {
             const target = event.target;
             const classNames = this.classNames;
 
@@ -223,7 +227,7 @@ export default class Core {
         });
 
         if (options.allowFullscreen) {
-            this.block.addEventListener(fullScreenApi.changeEventType, () => {
+            container.addEventListener(fullScreenApi.changeEventType, () => {
                 this.setOptions();
             });
         }
@@ -241,7 +245,11 @@ export default class Core {
     }
 
     createDotsNavigation() {
-        this.dotsContainer = createDotsContainer(this.block, this.classNames.dots.base);
+        const dotsContainer = document.createElement('ul');
+
+        dotsContainer.className = this.classNames.dots.base;
+
+        this.dotsContainer = this.block.appendChild(dotsContainer);
 
         this.setDots();
 
@@ -257,7 +265,7 @@ export default class Core {
         const dotsCount = this.screens;
 
         if (container && container.children.length !== dotsCount) {
-            container.innerHTML = new Array(dotsCount + 1).join(`<li class="${this.classNames.dots.item}" />`);
+            container.innerHTML = new Array(dotsCount + 1).join(`<li class="${this.classNames.dots.item}"></li>`);
         }
 
         this.setActiveDot();
@@ -266,14 +274,9 @@ export default class Core {
     // подсвечивает нужную точку
     setActiveDot() {
         const container = this.dotsContainer;
-
-        // если нет контейнера — нет точек
-        if (!container) {
-            return;
-        }
-
         const activeDotClassName = this.classNames.dots.active;
-        const dotIndex = Math.round(this.current / this.options.slideBy);
+        const dotIndex = Math.round(this.current / this._options.slideBy);
+
         const currentActiveDot = container.getElementsByClassName(activeDotClassName)[0];
 
         currentActiveDot && currentActiveDot.classList.remove(activeDotClassName);
@@ -309,14 +312,14 @@ export default class Core {
     }
 
     setNavigationState() {
-        this.options.enableArrows && this.setArrowsActivity();
-        this.options.enableDots && this.setDots();
+        this._options.enableArrows && this.setArrowsActivity();
+        this._options.enableDots && this.dotsContainer && this.setDots();
     }
 
     // в настольном сафари нельзя просто взять и запустить фулскрин
     // он должнен быть запущен в ответ на действие пользователя
     fullscreen() {
-        if (this.options.allowFullscreen === true) {
+        if (this._options.allowFullscreen === true) {
             fullScreenApi.request(this.block);
         }
     }
