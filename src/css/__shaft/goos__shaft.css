@@ -1,5 +1,7 @@
 .goos__shaft
 {
+    position: relative;
+
     display: flex;
     overflow-x: scroll;
     overflow-y: hidden;
@@ -11,13 +13,15 @@
 
     list-style: none;
 
-    transform: translateZ(0);
+    transform: translate3d(0,0,0);
 
     flex-wrap: nowrap;
     scroll-snap-type: mandatory;
     scroll-snap-points-x: repeat(100%);
     scroll-behavior: smooth;
+
     -webkit-overflow-scrolling: touch;
             overflow-scrolling: touch;
+
     touch-action: pan-x pinch-zoom double-tap-zoom;
 }

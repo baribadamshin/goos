@@ -34,10 +34,10 @@
 
 .goos:fullscreen .goos__shaft
 {
-    height: 100%;
+    min-height: 100%;
     /* в этом режиме отрицательный margin не работает */
-    margin-right: 0;
-    padding-right: 0;
+    margin-right: 0 !important;
+    padding-right: 0 !important;
 }
 
 .goos:fullscreen .goos__item
@@ -90,20 +90,23 @@
     z-index: 9999;
     top: 0;
     left: 0;
+    bottom: 0;
+    right: 0;
 
     width: 100% !important;
     height: 100% !important;
     margin: 0 !important;
-
-    background: #000;
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .goos_fullscreen .goos__shaft
 {
     height: 100%;
     /* в этом режиме отрицательный margin не работает */
-    margin-right: 0;
-    padding-right: 0;
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+
+    overflow-y: hidden;
 }
 
 .goos_fullscreen::before
@@ -121,6 +124,8 @@
     align-items: center;
     align-content: center;
     justify-content: center;
+
+    transition-timing-function: step-start;
 }
 
 .goos_fullscreen .goos__item > *
@@ -155,4 +160,11 @@
 .goos_fullscreen .goos__arrow_next
 {
     right: 2%;
+}
+
+/* styles for body node */
+html.fullscreen-mode-fallback,
+html.fullscreen-mode-fallback body
+{
+    overflow: hidden;
 }

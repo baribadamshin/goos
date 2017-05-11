@@ -1,4 +1,14 @@
+.goos_init_touch
+{
+    overflow: hidden;
+}
+
 .goos_init_touch .goos__shaft
 {
     overflow: auto;
+
+    transition: transform .1s;
+
+    /* Mobile Safari render bug */
+    transform: none;
 }

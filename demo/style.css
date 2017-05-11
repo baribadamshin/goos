@@ -6,7 +6,7 @@ body
 .goos
 {
     width: 100%;
-    margin: 0 auto 2%;
+    margin: 60px auto 100px;
 }
 
 .goos__item .snippet
@@ -17,7 +17,7 @@ body
 
     width: 100%;
     height: 100%;
-    min-height: 200px;
+    min-height: 300px;
 
     color: #fff;
     background: deepskyblue;

@@ -1,0 +1,20 @@
+.goos_scaling
+{
+    overflow: visible;
+    z-index: 3;
+}
+
+.goos_scaling .goos__dots
+{
+    transition: opacity .2s;
+}
+
+.goos_scaling:active .goos__shaft
+{
+    transition-timing-function: step-start;
+}
+
+.goos_scaling:active .goos__dots
+{
+    opacity: 0;
+}

@@ -14,11 +14,13 @@ export default (w, d) => {
     // UC browser thinks that he can matchMedia but he's not
     const matchMedia = 'matchMedia' in w && /ucbrowser/i.test(w.navigator.userAgent) !== true;
     const scrollSnap = isScrollSnapPropertySupport(w);
+    const gestureEvents = 'ongestureend' in d.documentElement;
 
     return {
         matchMedia,
         mutationObserver,
-        scrollSnap
+        scrollSnap,
+        gestureEvents
     }
 };
 
@@ -27,4 +29,5 @@ export default (w, d) => {
  * @property {boolean} mutationObserver
  * @property {boolean} matchMedia
  * @property {boolean} scrollSnap
+ * @property {boolean} gestureEvents
  */

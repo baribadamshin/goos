@@ -1,7 +1,7 @@
 'use strict';
 
-import performance from '../polyfills/perfomance';
-import requestAnimation from '../polyfills/requestAnimationFrame';
+import performance from '../ponyfills/perfomance';
+import requestAnimation from '../ponyfills/requestAnimationFrame';
 
 /**
  *

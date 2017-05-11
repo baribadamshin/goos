@@ -1,6 +1,8 @@
 'use strict';
 
 const FULLSCREEN_CLASS_NAME = 'goos_fullscreen';
+const BODY_FULLSCREEN_CLASS_NAME = 'fullscreen-mode-fallback';
+
 const elementProperties = [
     'fullscreenElement',
     'webkitFullscreenElement',
@@ -14,14 +16,20 @@ const changeEvents = [
     'MSFullscreenChange'
 ];
 
-function requestFullscreen(eventName) {
+function requestFullscreen(d, elementProperty, eventName) {
+    d[elementProperty] = this;
+
+    d.documentElement.classList.add(BODY_FULLSCREEN_CLASS_NAME);
     this.classList.add(FULLSCREEN_CLASS_NAME);
 
     this.dispatchEvent(new CustomEvent(eventName));
 }
 
-function exitFullscreen(eventName) {
+function exitFullscreen(d, elementProperty, eventName) {
+    d[elementProperty] = undefined;
+
     this.classList.remove(FULLSCREEN_CLASS_NAME);
+    d.documentElement.classList.remove(BODY_FULLSCREEN_CLASS_NAME);
 
     this.dispatchEvent(new CustomEvent(eventName));
 }
@@ -62,7 +70,6 @@ export default (function (w, d) {
         }
     });
 
-
     elementProperties.forEach(property => {
         if (property in d) {
             elementProperty = property;
@@ -70,14 +77,13 @@ export default (function (w, d) {
     });
 
     return {
-        currentFullScreenElement: null,
+        elementProperty,
+        isFullscreenOn() {
+            return !!d[elementProperty];
+        },
         changeEventType,
         request(container) {
-            requestMethod && requestMethod.call(container, changeEventType);
-
-            if (!d[elementProperty]) {
-                this.currentFullScreenElement = container;
-            }
+            requestMethod.call(container, d, elementProperty, changeEventType);
         },
         exit() {
             if (exitMethod) {
@@ -85,15 +91,16 @@ export default (function (w, d) {
                 return;
             }
 
-            exitFullscreen.call(d[elementProperty] || this.currentFullScreenElement, changeEventType);
-            this.currentFullScreenElement = null;
+            exitFullscreen.call(d[elementProperty], d, elementProperty, changeEventType);
         }
     };
 }(window, document));
 
 /**
  * @typedef {Object} fullScreenApi
+ * @property {boolean} contentInFullScreenMode
+ * @property {string} elementProperty
+ * @property {string} changeEventType
  * @property {Function} request
  * @property {Function} exit
- * @property {string} changeEventType
  */

@@ -3,7 +3,8 @@
 import getBrowserSupportFeatures from './utils/getBrowserSupportFeatures';
 import getOptionsFromClassList from './utils/getOptionsFromClassList'
 
-import fullScreenApi from './helpers/fullscreen';
+import fullScreenApi from './ponyfills/fullscreen';
+
 import createArrow from './helpers/createArrow';
 
 export default class Core {
@@ -92,8 +93,12 @@ export default class Core {
      */
     setDomElements(container) {
         this.classNames = {
-            init: 'goos_init',
             shaft: 'goos__shaft',
+            mods: {
+                init: 'goos_init',
+                scaling: 'goos_scaling',
+            },
+            item: 'goos__item',
             arrows: {
                 base: 'goos__arrow',
                 prev: 'goos__arrow_prev',
@@ -161,7 +166,9 @@ export default class Core {
             styleOptions
         );
 
-        this.current = this._options.current;
+        if (this._options.current !== this.current) {
+            this.current = this._options.current;
+        }
     }
 
     /**
@@ -195,7 +202,7 @@ export default class Core {
     }
 
     setUserInterface() {
-        this.block.classList.add(this.classNames.init);
+        this.block.classList.add(this.classNames.mods.init);
 
         this._options.enableDots && this.createDotsNavigation();
 
@@ -203,7 +210,6 @@ export default class Core {
     }
 
     /**
-     *
      * @param {Window} w
      * @param {object} options
      * @param {object} support
@@ -229,6 +235,7 @@ export default class Core {
         if (options.allowFullscreen) {
             container.addEventListener(fullScreenApi.changeEventType, () => {
                 this.setOptions();
+                this.setNavigationState();
             });
         }
     }
@@ -256,10 +263,7 @@ export default class Core {
         this.block.classList.add(this.classNames.dots.init);
     }
 
-    /**
-     * Рисует, если это необходимо, нужное количество точек в dotsContainer
-     * и отмечает точку соответствующую current
-     */
+    // Draws dots navigation and call setActiveDot method
     setDots() {
         const container = this.dotsContainer;
         const dotsCount = this.screens;
@@ -271,7 +275,7 @@ export default class Core {
         this.setActiveDot();
     }
 
-    // подсвечивает нужную точку
+    // Calculates which dot should be selected and marks one
     setActiveDot() {
         const container = this.dotsContainer;
         const activeDotClassName = this.classNames.dots.active;
@@ -283,7 +287,6 @@ export default class Core {
         container.children[dotIndex].classList.add(activeDotClassName);
     }
 
-    // меняет активное состояние стрелок
     setArrowsActivity() {
         if (!this.arrowPrev || !this.arrowNext) {
             return;
@@ -295,7 +298,7 @@ export default class Core {
             this.arrowPrev.removeAttribute(arrowDisabledAttribute);
             this.arrowNext.removeAttribute(arrowDisabledAttribute);
 
-            return true;
+            return;
         }
 
         if (this._edge === 'start') {
@@ -316,10 +319,21 @@ export default class Core {
         this._options.enableDots && this.dotsContainer && this.setDots();
     }
 
-    // в настольном сафари нельзя просто взять и запустить фулскрин
-    // он должнен быть запущен в ответ на действие пользователя
-    fullscreen() {
-        if (this._options.allowFullscreen === true) {
+    /**
+     * Toggle fullscreen mode
+     * (important) you can't call fullscreen mode as method on instance.
+     * its always should be callback for user action like click
+     *
+     * @param {boolean} exit - immediately exit from fullscreen mode
+     */
+    toggleFullscreen(exit = false) {
+        if (this._options.allowFullscreen === false) {
+            return;
+        }
+
+        if (fullScreenApi.isFullscreenOn()) {
+            fullScreenApi.exit();
+        } else if (exit === false) {
             fullScreenApi.request(this.block);
         }
     }

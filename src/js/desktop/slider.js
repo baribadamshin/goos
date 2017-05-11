@@ -6,30 +6,26 @@ export default class Slider extends Core {
         this.head.style.marginLeft = (-100 * current) + '%';
     }
 
-    setUserInterface(specific) {
+    setUserInterface() {
         this.options.enableArrows && this.createArrows();
 
-        super.setUserInterface(arguments);
+        super.setUserInterface();
     }
 
     _addEventListeners(w, container, options, support) {
-        const config = {
-            attributes: true,
-            attributeOldValue: true,
-            attributeFilter: [
-                'class',
-            ]
-        };
-
         if (support.mutationObserver) {
-            const observer = new MutationObserver(() => {
-                this.setOptions();
-            });
+            const observer = new MutationObserver(this.setOptions.bind(this));
 
-            observer.observe(container, config);
+            observer.observe(container, {
+                attributes: true,
+                attributeOldValue: true,
+                attributeFilter: [
+                    'class',
+                ]
+            });
         }
 
-        if (options.responsive) {
+        if (options.responsive === true) {
             // когда мы включаем адаптивный режим, нам нужно следить за тем чтобы мы не
             // прокручивали больше элементов чем их видно на экране
             // т.е был слайдер на 4 элемента с прокруткой по 3; окно уменьшилось — теперь слайдер шириной 2

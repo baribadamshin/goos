@@ -1,4 +1,5 @@
 @import '__shaft/goos__shaft.css';
+
 @import '__item/goos__item.css';
 
 /* стрелки */
@@ -37,9 +38,18 @@
 /* появились элементы управления */
 @import '_nav/goos_nav_dots.css';
 
+/* интерактив */
+@import '_scaling/goos_scaling.css';
+
 .goos
 {
     position: relative;
+}
+
+.goos:active,
+.goos:active .goos__shaft
+{
+    z-index: 2;
 }
 
 .goos::before
@@ -50,4 +60,8 @@
 
     width: 0;
     height: 0;
+}
+
+html {
+    touch-action: manipulation;
 }
