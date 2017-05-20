@@ -1,13 +1,53 @@
+html, body
+{
+    background: #fff;
+    margin: 0;
+}
+
 body
 {
-    padding: 2%;
+    padding: 5%
+}
+
+html
+{
+    touch-action: manipulation;
 }
 
 .goos
 {
     width: 100%;
-    margin: 0 auto 2%;
+    margin: 60px auto 100px;
 }
+
+.goos__item {
+    font-size: 0;
+    overflow: hidden;
+
+    height: 300px;
+}
+
+.goos__item img
+{
+    max-width: 100%;
+    max-height: 100%;
+
+    display: block;
+    margin: auto;
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    box-sizing: border-box;
+
+    transform: translateZ(0);
+}
+
+
 
 .goos__item .snippet
 {
@@ -17,7 +57,7 @@ body
 
     width: 100%;
     height: 100%;
-    min-height: 200px;
+    min-height: 300px;
 
     color: #fff;
     background: deepskyblue;
@@ -36,5 +76,10 @@ body
     .goos
     {
         width: 80%;
+    }
+
+    body
+    {
+        padding: 2% 5%;
     }
 }

@@ -1,4 +1,19 @@
+.goos_init_touch
+{
+    overflow: hidden;
+}
+
 .goos_init_touch .goos__shaft
 {
     overflow: auto;
+
+    /* Mobile Safari render bug */
+    transform: none;
+
+    will-change: scroll-position;
+}
+
+.goos_init_touch .goos__dots
+{
+    pointer-events: none;
 }
