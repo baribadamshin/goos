@@ -8,5 +8,8 @@ function getDistance(finger1, finger2) {
 }
 
 export default (startTouchEvent, endTouchEvent) => {
-    return getDistance(endTouchEvent[0], endTouchEvent[1]) / getDistance(startTouchEvent[0], startTouchEvent[1]);
+    const endDistance = getDistance(endTouchEvent[0], endTouchEvent[1]);
+    const startDistance = getDistance(startTouchEvent[0], startTouchEvent[1]);
+
+    return endDistance / startDistance;
 }

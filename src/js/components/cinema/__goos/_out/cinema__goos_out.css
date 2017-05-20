@@ -1,0 +1,21 @@
+.cinema__goos_out
+{
+    transform: scale(.9);
+
+    opacity: 0;
+    animation: cinemaGoosFadeOut .3s;
+}
+
+@keyframes cinemaGoosFadeOut
+{
+    from
+    {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to
+    {
+        opacity: 0;
+        transform: scale(.8);
+    }
+}

@@ -7,8 +7,13 @@
 {
     overflow: auto;
 
-    transition: transform .1s;
-
     /* Mobile Safari render bug */
     transform: none;
+
+    will-change: scroll-position;
+}
+
+.goos_init_touch .goos__dots
+{
+    pointer-events: none;
 }

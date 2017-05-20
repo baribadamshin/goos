@@ -28,9 +28,10 @@
 @import '_responsive/goos_responsive.css';
 
 /* вспомогательные штуки */
-@import '_animation/goos_animation_off.css';
 @import '_init/goos_init.css';
 @import '_init/goos_init_touch.css';
+@import '_animation/goos_animation_off.css';
+@import '_touched/goos_touched.css';
 
 /* фуллскрин */
 @import '_fullscreen/goos_fullscreen.css';
@@ -46,12 +47,6 @@
     position: relative;
 }
 
-.goos:active,
-.goos:active .goos__shaft
-{
-    z-index: 2;
-}
-
 .goos::before
 {
     position: absolute;
@@ -62,6 +57,3 @@
     height: 0;
 }
 
-html {
-    touch-action: manipulation;
-}

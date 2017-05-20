@@ -18,10 +18,16 @@ export default (function() {
         };
     }());
 
+    // he has a broken requestAnimationFrame
+    if (/ucbrowser/i.test(w.navigator.userAgent) === true) {
+        return requestAnimation;
+    }
+
     return w.requestAnimationFrame
         || w.webkitRequestAnimationFrame
         || w.oRequestAnimationFrame
         || w.msRequestAnimationFrame
+        || w.mozRequestAnimationFrame
         || requestAnimation;
 }());
 

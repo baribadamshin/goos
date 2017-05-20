@@ -1,10 +1,9 @@
 'use strict';
 
 /**
- * @param {Window} w
  * @returns {boolean}
  */
-export default w => {
+export default () => {
     let scrollSnapProperty = 'scroll-snap-type: mandatory';
 
     scrollSnapProperty = [
@@ -13,5 +12,5 @@ export default w => {
         `(${scrollSnapProperty})`,
     ].join('or');
 
-    return !!(w.CSS && w.CSS.supports(scrollSnapProperty));
+    return !!(window.CSS && CSS.supports(scrollSnapProperty));
 };

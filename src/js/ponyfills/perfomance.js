@@ -1,6 +1,7 @@
 'use strict';
 
+const initTime = +new Date();
+
 export default (window.performance || {
-    offset: Date.now(),
-    now: () => Date.now() - this.offset
+    now: () => +new Date() - initTime
 });

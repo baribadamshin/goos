@@ -1,11 +1,11 @@
 'use strict';
 
-export default (function (e) {
-    return e.closest || (cssSelector => {
+export default (function () {
+    return function (cssSelector) {
         let node = this;
 
         while (node) {
-            if (node.matches(cssSelector)) {
+            if (node.classList.contains(cssSelector)) {
                 return node;
             } else {
                 node = node.parentElement;
@@ -13,5 +13,5 @@ export default (function (e) {
         }
 
         return null;
-    });
-})(Element.prototype);
+    }
+})();

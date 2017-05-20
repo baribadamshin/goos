@@ -1,142 +1,90 @@
-/*
-    Мобильный сафари не умеет вот такие конструкции
-    .goos_fullscreen,
-    .goos:fullscreen
-
-    Хотелось одни и те же стили использовать для фолбэка и нативной реализации
-    Из-за него будем дублировать
-
-
-
-/**
- * Нативный фуллскрин
- */
-.goos:fullscreen
-{
-    display: flex;
-
-    margin: 0 !important;
-
-    background: 0 0;
-
-    flex-wrap: wrap;
-    align-content: center;
-
-    width: 100% !important;
-    height: 100% !important;
-}
-
-/* в фуллскрине показываем только 1 слайд */
-.goos:fullscreen:before
-{
-    content: '1';
-}
-
-.goos:fullscreen .goos__shaft
-{
-    min-height: 100%;
-    /* в этом режиме отрицательный margin не работает */
-    margin-right: 0 !important;
-    padding-right: 0 !important;
-}
-
-.goos:fullscreen .goos__item
-{
-    display: flex;
-
-    border-right: 0;
-
-    align-items: center;
-    align-content: center;
-    justify-content: center;
-}
-
-.goos:fullscreen .goos__dots
-{
-    position: absolute;
-    bottom: 14px;
-}
-
-/* фон темный, сделаем контрастными элементы управления */
-.goos:fullscreen .goos__dot
-{
-    color: rgba(255,255,255,.5);
-}
-
-.goos:fullscreen .goos__arrow
-{
-    margin: 0 !important;
-
-    color: #fff;
-}
-
-/* скорректируем положение кнопок */
-.goos:fullscreen .goos__arrow_prev
-{
-    left: 2%;
-}
-
-.goos:fullscreen .goos__arrow_next
-{
-    right: 2%;
-}
-
-/**
- * Фолбэк
- */
 .goos_fullscreen
 {
     position: fixed !important;
-    z-index: 9999;
     top: 0;
-    left: 0;
     bottom: 0;
-    right: 0;
+    left: 0;
+
+    overflow: hidden;
 
     width: 100% !important;
-    height: 100% !important;
     margin: 0 !important;
-    background: rgba(0, 0, 0, 0.5);
+
+    pointer-events: none;
+
+    touch-action: none;
 }
 
-.goos_fullscreen .goos__shaft
-{
-    height: 100%;
-    /* в этом режиме отрицательный margin не работает */
-    margin-right: 0 !important;
-    padding-right: 0 !important;
-
-    overflow-y: hidden;
-}
-
+/* size option to goos */
 .goos_fullscreen::before
 {
     content: '1';
 }
 
-.goos_fullscreen .goos__item
+/* close button */
+.goos_fullscreen::after
 {
-    display: flex;
-    flex-direction: column;
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    right: 0;
 
-    border-right: 0;
+    width: 50px;
+    height: 50px;
 
-    align-items: center;
-    align-content: center;
-    justify-content: center;
+    content: '\00d7';
+    cursor: pointer;
+    pointer-events: auto;
 
-    transition-timing-function: step-start;
+    display: block;
+
+    text-align: center;
+
+    font: normal 100 50px/40px "Helvetica Neue";
+
+    color: #fff;
+    opacity: .5;
 }
 
-.goos_fullscreen .goos__item > *
+.goos_fullscreen .goos__shaft
 {
-    flex-grow: 1;
+    overflow-y: hidden;
+
+    height: 100%;
+    /* в этом режиме отрицательный margin не работает */
+    padding-right: 0 !important;
+
+    pointer-events: auto;
+    /* решает проблему с рендером масштабированных изображений во время прокрутки на андройде */
+
+    clip-path: inset(0 0 0 0) !important;
+
+    transition: all .4s;
+}
+
+.goos_fullscreen.goos_margin .goos__shaft
+{
+    margin-right: -14px;
+}
+
+.goos_fullscreen .goos__item
+{
+    height: 100%;
 }
 
 .goos_fullscreen .goos__dots
 {
     position: absolute;
-    bottom: 14px;
+    bottom: 0;
+
+    padding-bottom: 18px;
+
+    animation: goosFullscreenDotsShowedUp .4s;
+
+    opacity: 1;
+    z-index: 4;
+
+    pointer-events: auto;
 }
 
 .goos_fullscreen .goos__dot
@@ -146,25 +94,32 @@
 
 .goos_fullscreen .goos__arrow
 {
-    margin: 0 !important;
-
     color: #fff;
 }
 
 /* скорректируем положение кнопок */
 .goos_fullscreen .goos__arrow_prev
 {
-    left: 2%;
+    transform: translate(200%, -50%);
 }
 
 .goos_fullscreen .goos__arrow_next
 {
-    right: 2%;
+    transform: translate(-200%, -50%);
 }
 
-/* styles for body node */
-html.fullscreen-mode-fallback,
-html.fullscreen-mode-fallback body
+@keyframes goosFullscreenDotsShowedUp
 {
-    overflow: hidden;
+    from
+    {
+        transform: translateY(10px);
+
+        opacity: 0;
+    }
+    to
+    {
+        transform: translateY(0);
+
+        opacity: 1;
+    }
 }

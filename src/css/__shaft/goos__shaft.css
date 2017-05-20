@@ -7,13 +7,15 @@
     overflow-y: hidden;
 
     box-sizing: border-box;
-    min-width: 100%;
+
+    min-width: calc(100% + 0px); /* safari */
+
     margin: 0;
     padding: 0;
 
     list-style: none;
 
-    transform: translate3d(0,0,0);
+    transform: translateZ(0);
 
     flex-wrap: nowrap;
     scroll-snap-type: mandatory;
@@ -23,5 +25,6 @@
     -webkit-overflow-scrolling: touch;
             overflow-scrolling: touch;
 
-    touch-action: pan-x pinch-zoom double-tap-zoom;
+    touch-action: manipulation;
 }
+

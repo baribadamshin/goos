@@ -13,18 +13,6 @@ export default class Slider extends Core {
     }
 
     _addEventListeners(w, container, options, support) {
-        if (support.mutationObserver) {
-            const observer = new MutationObserver(this.setOptions.bind(this));
-
-            observer.observe(container, {
-                attributes: true,
-                attributeOldValue: true,
-                attributeFilter: [
-                    'class',
-                ]
-            });
-        }
-
         if (options.responsive === true) {
             // когда мы включаем адаптивный режим, нам нужно следить за тем чтобы мы не
             // прокручивали больше элементов чем их видно на экране
@@ -46,6 +34,16 @@ export default class Slider extends Core {
                 // стрелка вправо
                 if (target.classList.contains(classNames.arrows.next)) {
                     this.next();
+                }
+
+                // клик по точке в навигации
+                if (target.classList.contains(classNames.dots.item)) {
+                    const dotIndex = [].indexOf.call(this.dotsContainer.children, target);
+                    const screenIndex = Math.round(this.items.length / this.screens * dotIndex);
+
+                    if (this.current !== screenIndex) {
+                        this.current = screenIndex;
+                    }
                 }
             });
         }

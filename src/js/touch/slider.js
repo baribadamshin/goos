@@ -2,6 +2,7 @@ import debounce from '../helpers/debounce';
 import animate from '../helpers/animate';
 import closest from '../ponyfills/closest';
 import getScale from '../utils/getScale';
+import cinema from '../components/cinema';
 
 import Core from '../core';
 
@@ -9,23 +10,32 @@ export default class TouchSlider extends Core {
     constructor(container, options) {
         super(container, options);
 
-        this.pinch = false;
-        this.touched = false;
-        this.rotation = false;
-        this.scrolling = false;
+        // состояние когда нужно скорректировать положение слайдов
+        this.unstableState = false;
+
+        // предотвратить корректировку
+        this.preventCorrection = false;
 
         // скролл или любое другое событие вызванное программным путем
+        // в этои режиме нет реакции на события
         this.programAction = false;
     }
 
     setUserInterface() {
-        this.classNames.mods.init = 'goos_init_touch';
+        const goos = 'goos';
+
+        // специфичные тачовые классы
+        this.classNames.mods = Object.assign(this.classNames.mods, {
+            init: goos + '_init_touch',
+            scaling: goos + '_scaling',
+            touched: goos + '_touched'
+        });
 
         super.setUserInterface();
     }
 
     setOptions(options) {
-        this._setSlideWidth();
+        this.slideWidth = this.head.getBoundingClientRect().width;
 
         super.setOptions(options);
     }
@@ -38,26 +48,27 @@ export default class TouchSlider extends Core {
      * @param {HTMLCollection} items
      */
     action(current, options, support, items) {
+        if (this.preventCorrection === true) {
+            return;
+        }
+
         const correctScroll = Math.round(current * this.slideWidth);
+
+        if (correctScroll === this.shaft.scrollLeft && this.unstableState) {
+            this.unstableState = false;
+            return;
+        }
 
         if (correctScroll !== this.shaft.scrollLeft) {
             this.programAction = true;
-            //this.head.style.marginLeft = ((correctScroll - this.shaft.scrollLeft) * -1) + 'px';
 
-            this.shaft.scrollLeft = correctScroll;
-            //this.shaft.scrollLeft = correctScroll;
-            //setTimeout(() => {this.programAction = false}, 200);
-
-            // while browser doing rotation our animations is not working
-            // that's why we immediately change scroll without animations
-            // for browsers with scrollSnap change immediately as well
-            /*if (support.scrollSnap || this.rotation === true) {
+            if (this.unstableState === true) {
                 this.shaft.scrollLeft = correctScroll;
 
                 return;
             }
 
-            this._animateToSlide(correctScroll);*/
+            this._animateToSlide(correctScroll, options.animateDuration);
         }
     }
 
@@ -73,24 +84,18 @@ export default class TouchSlider extends Core {
         super._addEventListeners.apply(this, arguments);
     }
 
-    _setSlideWidth() {
-        this.slideWidth = parseFloat(getComputedStyle(this.head).getPropertyValue('width'));
-    }
-
-    _animateToSlide(slidePosition) {
+    _animateToSlide(slidePosition, duration) {
         const startPosition = this.shaft.scrollLeft;
         const delta = startPosition - slidePosition;
 
         animate(
             progress => {this.shaft.scrollLeft = startPosition - delta * progress},
-            this.options.animateDuration,
+            duration
         );
     }
 
     _doubleTapHandler() {
         let tapedTwice = false;
-        let tapedSlide;
-        let originalCurrent;
 
         this.shaft.addEventListener('touchend', event => {
             if (tapedTwice === false) {
@@ -101,105 +106,60 @@ export default class TouchSlider extends Core {
 
             event.preventDefault();
 
-            if (tapedSlide) {
-                tapedSlide = null;
+            let tapedSlide = closest.call(event.target, this.classNames.item);
 
-                this.current = originalCurrent;
-            } else {
-                tapedSlide = closest.call(event.target, '.' + this.classNames.item);
-
-                if (tapedSlide) {
-                    originalCurrent = this.current;
-                    // change current to taped slide
-                    this.current = [].indexOf.call(this.items, tapedSlide);
-                }
+            if (!tapedSlide) {
+                return;
             }
 
-            this.toggleFullscreen();
+            this.unstableState = true;
+
+            cinema.request(this.block, tapedSlide);
         });
     }
 
     _scrollingHandler() {
         const shaft = this.shaft;
         const scrollEndHandler = () => {
-            this.scrolling = false;
-
-            // только если нет касаний к экрану и это не программный скролл
-            if (this.touched === false && this.programAction === false) {
-                console.log('scrollEndHandler');
-                // как только мы поменяем значение, сработает action
+            if (this.programAction === false && this.preventCorrection === false) {
                 this.current = Math.round(shaft.scrollLeft / this.slideWidth);
             }
 
+            this.preventCorrection = false;
+            this.unstableState = false;
             this.programAction = false;
         };
 
-        shaft.addEventListener('scroll', () => {this.scrolling = true}, false);
-        shaft.addEventListener('scroll', debounce(scrollEndHandler, 100), false);
-
-        shaft.addEventListener('touchstart', event => {
-            this.touched = true;
-        });
-        shaft.addEventListener('touchend', () => {
-            this.touched = false;
-
-            // скролл или таскание прекратились, палец убрали
-            if (this.scrolling === false && this.pinch === false) {
-                scrollEndHandler();
-            }
-        });
+        shaft.addEventListener('scroll', debounce(scrollEndHandler, 350), false);
     }
 
     _rotationHandler(w, support) {
-        // more flexible way to detect change of orientation
-        if (support.matchMedia) {
-            const matchPortrait = w.matchMedia('(orientation: portrait)');
-            const matchLandscape = w.matchMedia('(orientation: landscape)');
+        w.addEventListener('resize', () => {
+            // если это не экстренный случай, такие браузеры сами корректируют свое содержимое
+            if (support.scrollSnap && this.unstableState === true) {
+                this.preventCorrection = true;
+            }
 
-            // реагирует на поворот экрана
-            const orientationChangeHandler = query => {
-                if (query.matches === true) {
-                    // запомним, что произошел поворот
-                    // потом мы сможем свдинуть слайды без анимации зная, что этот сдвиг необходим из-за поворота
-                    // во время поворота анимации все равно не работают
-                    this.rotation = true;
-
-                    // карусель разберется, что нужно сделать
-                    this.setOptions();
-
-                    this.rotation = false;
-                }
-            };
-
-            matchPortrait.addListener(orientationChangeHandler);
-            matchLandscape.addListener(orientationChangeHandler);
-        } else {
-            w.addEventListener('orientationchange', this.setOptions.bind(this));
-        }
+            this.setOptions();
+        });
     }
 
     _pinchHandler(container, support) {
-        const MAX_SCALE = 1.6; // значение после которого увеличение будет гаситься
+        const MAX_SCALE = 1.2; // значение после которого увеличение будет гаситься
         const MIN_SCALE = 0.8;
-        const FACTOR = 8;
+        const FACTOR = 20;
 
-        let zoomedSlideIndex;
-        let originalCurrent;
-        let zoomedSlide;
-        let pinchStartEvent;
-
-        const onPinchStartHandler = event => {
-            this.pinch = true;
-
+        const onPinchStartHandler = () => {
             container.classList.add(this.classNames.mods.scaling);
+            container.classList.add(this.classNames.mods.touched);
         };
 
-        const onScaleChangeHandler = (event, manualCalculatedScale) => {
+        const onScaleChangeHandler = event => {
             event.preventDefault();
 
-            let scale = (manualCalculatedScale || event.scale);
+            let scale = event.scale;
 
-            if (scale > MAX_SCALE) {
+            if (scale > MAX_SCALE && cinema.state.enabled === false) {
                 scale = MAX_SCALE + Math.log(scale) / FACTOR;
             }
 
@@ -211,14 +171,15 @@ export default class TouchSlider extends Core {
         };
 
         const onPinchEndHandler = (event) => {
-            this.toggleFullscreen(event.scale < MIN_SCALE);
+            if (event.scale > MIN_SCALE && cinema.state.enabled === false) {
+
+                cinema.request(this.block, this.items[this.current]);
+
+                container.classList.remove(this.classNames.mods.scaling);
+            }
 
             this.shaft.style.transform = '';
-
-            container.classList.remove(this.classNames.mods.scaling);
-
-            // prevent touch end handler
-            setTimeout(() => {this.pinch = false}, 50);
+            container.classList.remove(this.classNames.mods.touched);
         };
 
         // mobile safari
@@ -228,16 +189,19 @@ export default class TouchSlider extends Core {
             this.block.addEventListener('gestureend', onPinchEndHandler, false);
         } else {
             let manualCalculatedScale;
+            let pinchStartEvent;
 
-            this.shaft.addEventListener('touchstart', event => {
-                if (event.touches.length !== 2) {return;}
+            this.block.addEventListener('touchstart', event => {
+                if (event.touches.length !== 2) {
+                    return;
+                }
 
                 pinchStartEvent = event;
 
                 onPinchStartHandler(event);
             }, false);
 
-            this.shaft.addEventListener('touchmove', event => {
+            this.block.addEventListener('touchmove', event => {
                 if (!pinchStartEvent) {return;}
 
                 const myEvent = {
@@ -248,7 +212,7 @@ export default class TouchSlider extends Core {
                 onScaleChangeHandler(myEvent);
             }, false);
 
-            this.shaft.addEventListener('touchend', event => {
+            this.block.addEventListener('touchend', event => {
                 if (!pinchStartEvent) {return;}
 
                 onPinchEndHandler(event, manualCalculatedScale);
