@@ -10,7 +10,7 @@
     padding: 0;
 
     cursor: pointer;
-    transition: .2s ease;
+    transition: .3s ease;
     transform: translateY(-50%);
 
     color: currentColor;
@@ -19,6 +19,7 @@
     background: transparent;
 
     touch-action: manipulation;
+    pointer-events: auto;
 }
 
 .goos__arrow::after

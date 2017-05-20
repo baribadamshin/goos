@@ -1,0 +1,55 @@
+@import '__slide/cinema__slide.css';
+@import '__outer/cinema__outer.css';
+@import '__goos/cinema__goos.css';
+@import '__goos/_out/cinema__goos_out.css';
+
+@import '_out/cinema_out.css';
+
+.cinema
+{
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    overflow: hidden;
+
+    outline: none;
+
+    touch-action: none;
+}
+
+.cinema::before
+{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    display: block;
+
+    content: '';
+    transform: translateZ(0);
+
+    backface-visibility: hidden;
+    will-change: opacity;
+
+    animation: cinemaBackgroundFadeIn 400ms cubic-bezier(.645, .045, .355, 1);
+
+    background: #000;
+}
+
+@keyframes cinemaBackgroundFadeIn
+{
+    from
+    {
+        opacity: 0;
+    }
+    to
+    {
+        opacity: 1;
+    }
+}

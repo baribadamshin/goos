@@ -1,0 +1,22 @@
+/* size option to goos */
+.goos_fullscreen_out
+{
+
+}
+
+
+@keyframes goosFullscreenFadeOut
+{
+    from
+    {
+        transform: translateY(10px);
+
+        opacity: 0;
+    }
+    to
+    {
+        transform: translateY(0);
+
+        opacity: 1;
+    }
+}

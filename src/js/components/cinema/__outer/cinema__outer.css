@@ -1,0 +1,8 @@
+.cinema__outer,
+.cinema__outer body
+{
+    overflow: hidden !important;
+
+    -webkit-overflow-scrolling: unset;
+    overflow-scrolling: unset;
+}

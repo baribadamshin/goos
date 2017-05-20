@@ -1,0 +1,16 @@
+.cinema.cinema_out::before
+{
+    animation: cinemaBackgroundFadeOut .35s;
+}
+
+@keyframes cinemaBackgroundFadeOut
+{
+    from
+    {
+        opacity: 1;
+    }
+    to
+    {
+        opacity: 0;
+    }
+}

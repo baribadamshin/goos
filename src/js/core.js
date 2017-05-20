@@ -3,7 +3,8 @@
 import getBrowserSupportFeatures from './utils/getBrowserSupportFeatures';
 import getOptionsFromClassList from './utils/getOptionsFromClassList'
 
-import fullScreenApi from './helpers/fullscreen';
+import cinema from './components/cinema';
+
 import createArrow from './helpers/createArrow';
 
 export default class Core {
@@ -13,10 +14,11 @@ export default class Core {
             return;
         }
 
-        this.support = getBrowserSupportFeatures(window, document);
+        this.support = getBrowserSupportFeatures();
 
         this.setDomElements(container);
         this.setOptions(options);
+
         this.setUserInterface();
     }
 
@@ -91,19 +93,27 @@ export default class Core {
      * @param {HtmlElement} container
      */
     setDomElements(container) {
+        const goos = 'goos';
+        
         this.classNames = {
-            init: 'goos_init',
-            shaft: 'goos__shaft',
+            base: goos,
+            shaft: goos + '__shaft',
+            mods: {
+                init: goos + '_init',
+                fullscreen: goos + '_fullscreen'
+            },
+            item: goos + '__item',
+            close: goos + '__close',
             arrows: {
-                base: 'goos__arrow',
-                prev: 'goos__arrow_prev',
-                next: 'goos__arrow_next'
+                base: goos + '__arrow',
+                prev: goos + '__arrow_prev',
+                next: goos + '__arrow_next'
             },
             dots: {
-                init: 'goos_nav_dots',
-                base: 'goos__dots',
-                item: 'goos__dot',
-                active: 'goos__dot_active'
+                init: goos + '_nav_dots',
+                base: goos + '__dots',
+                item: goos + '__dot',
+                active: goos + '__dot_active'
             }
         };
 
@@ -130,7 +140,7 @@ export default class Core {
             enableArrows: false,
             enableDots: false,
             allowFullscreen: true,
-            animateDuration: 250,
+            animateDuration: 200,
         };
 
         const allowFullscreen = options.allowFullscreen || (this._options && this._options.allowFullscreen);
@@ -195,7 +205,7 @@ export default class Core {
     }
 
     setUserInterface() {
-        this.block.classList.add(this.classNames.init);
+        this.block.classList.add(this.classNames.mods.init);
 
         this._options.enableDots && this.createDotsNavigation();
 
@@ -203,7 +213,6 @@ export default class Core {
     }
 
     /**
-     *
      * @param {Window} w
      * @param {object} options
      * @param {object} support
@@ -211,25 +220,34 @@ export default class Core {
      * @protected
      */
     _addEventListeners(w, container, options, support) {
-        container.addEventListener('click', event => {
-            const target = event.target;
-            const classNames = this.classNames;
+        if (support.mutationObserver) {
+            const observer = new MutationObserver(this.setOptions.bind(this));
 
-            // клик по точке в навигации
-            if (target.classList.contains(classNames.dots.item)) {
-                const dotIndex = Array.prototype.indexOf.call(this.dotsContainer.children, target);
-                const screenIndex = Math.round(this.items.length / this.screens * dotIndex);
-
-                if (this.current !== screenIndex) {
-                    this.current = screenIndex;
-                }
-            }
-        });
+            observer.observe(container, {
+                attributes: true,
+                attributeOldValue: true,
+                attributeFilter: [
+                    'class',
+                ]
+            });
+        }
 
         if (options.allowFullscreen) {
-            container.addEventListener(fullScreenApi.changeEventType, () => {
-                this.setOptions();
+            this.block.addEventListener(cinema.changeEventName, () => {
+                this.block.classList.toggle(this.classNames.mods.fullscreen);
+
+                if (!support.mutationObserver) {
+                    this.setOptions();
+                }
             });
+
+            // это клик по крестику, а не по блоку в целом
+            // потому-что на блок кликать запрещено, но у него есть псведоэлемент (крестик) на который разрешено
+            this.block.addEventListener('click', event => {
+                if (event.target.classList.contains(this.classNames.base)) {
+                    cinema.close();
+                }
+            }, false);
         }
     }
 
@@ -256,22 +274,19 @@ export default class Core {
         this.block.classList.add(this.classNames.dots.init);
     }
 
-    /**
-     * Рисует, если это необходимо, нужное количество точек в dotsContainer
-     * и отмечает точку соответствующую current
-     */
+    // Draws dots navigation and call setActiveDot method
     setDots() {
         const container = this.dotsContainer;
         const dotsCount = this.screens;
 
         if (container && container.children.length !== dotsCount) {
-            container.innerHTML = new Array(dotsCount + 1).join(`<li class="${this.classNames.dots.item}"></li>`);
+            container.innerHTML = new Array(dotsCount + 1).join(`<li class="${this.classNames.dots.item}"/>`);
         }
 
         this.setActiveDot();
     }
 
-    // подсвечивает нужную точку
+    // Calculates which dot should be selected and marks one
     setActiveDot() {
         const container = this.dotsContainer;
         const activeDotClassName = this.classNames.dots.active;
@@ -283,7 +298,6 @@ export default class Core {
         container.children[dotIndex].classList.add(activeDotClassName);
     }
 
-    // меняет активное состояние стрелок
     setArrowsActivity() {
         if (!this.arrowPrev || !this.arrowNext) {
             return;
@@ -295,7 +309,7 @@ export default class Core {
             this.arrowPrev.removeAttribute(arrowDisabledAttribute);
             this.arrowNext.removeAttribute(arrowDisabledAttribute);
 
-            return true;
+            return;
         }
 
         if (this._edge === 'start') {
@@ -315,19 +329,11 @@ export default class Core {
         this._options.enableArrows && this.setArrowsActivity();
         this._options.enableDots && this.dotsContainer && this.setDots();
     }
-
-    // в настольном сафари нельзя просто взять и запустить фулскрин
-    // он должнен быть запущен в ответ на действие пользователя
-    fullscreen() {
-        if (this._options.allowFullscreen === true) {
-            fullScreenApi.request(this.block);
-        }
-    }
 }
 
 /**
  * @typedef {Object} GoosOptions
- * @property {number} animateSpeed
+ * @property {number} animateDuration
  * @property {boolean} allowFullscreen
  * @property {boolean} enableArrows
  * @property {boolean} enableDots

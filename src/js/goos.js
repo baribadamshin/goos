@@ -15,7 +15,7 @@ function isMobile() {
 
 module.exports = function goos(domElements, options) {
     const Instance = isMobile() ? TouchSlider : Slider;
-    const init = (domElement) => new Instance(domElement, options);
+    const init = domElement => new Instance(domElement, options);
 
     if (domElements && domElements.length) {
         return Array.prototype.map.call(domElements, init);

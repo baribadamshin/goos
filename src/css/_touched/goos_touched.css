@@ -1,0 +1,4 @@
+.goos_touched .goos__shaft
+{
+    transition-timing-function: step-start !important;
+}

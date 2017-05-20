@@ -1,5 +1,8 @@
 import debounce from '../helpers/debounce';
 import animate from '../helpers/animate';
+import closest from '../ponyfills/closest';
+import getScale from '../utils/getScale';
+import cinema from '../components/cinema';
 
 import Core from '../core';
 
@@ -7,19 +10,32 @@ export default class TouchSlider extends Core {
     constructor(container, options) {
         super(container, options);
 
-        this.touched = false;
-        this.rotation = false;
-        this.scrolling = false;
+        // состояние когда нужно скорректировать положение слайдов
+        this.unstableState = false;
+
+        // предотвратить корректировку
+        this.preventCorrection = false;
+
+        // скролл или любое другое событие вызванное программным путем
+        // в этои режиме нет реакции на события
+        this.programAction = false;
     }
 
     setUserInterface() {
-        this.classNames.init = 'goos_init_touch';
+        const goos = 'goos';
+
+        // специфичные тачовые классы
+        this.classNames.mods = Object.assign(this.classNames.mods, {
+            init: goos + '_init_touch',
+            scaling: goos + '_scaling',
+            touched: goos + '_touched'
+        });
 
         super.setUserInterface();
     }
 
     setOptions(options) {
-        this._setSlideWidth();
+        this.slideWidth = this.head.getBoundingClientRect().width;
 
         super.setOptions(options);
     }
@@ -32,41 +48,49 @@ export default class TouchSlider extends Core {
      * @param {HTMLCollection} items
      */
     action(current, options, support, items) {
+        if (this.preventCorrection === true) {
+            return;
+        }
+
         const correctScroll = Math.round(current * this.slideWidth);
 
-        if (support.scrollSnap === false && correctScroll !== this.shaft.scrollLeft) {
-            // while browser doing rotation our animations is not working
-            // that's why we immediately change scroll without animations
-            if (this.rotation === true) {
+        if (correctScroll === this.shaft.scrollLeft && this.unstableState) {
+            this.unstableState = false;
+            return;
+        }
+
+        if (correctScroll !== this.shaft.scrollLeft) {
+            this.programAction = true;
+
+            if (this.unstableState === true) {
                 this.shaft.scrollLeft = correctScroll;
 
                 return;
             }
 
-            this._animateToSlide(correctScroll);
+            this._animateToSlide(correctScroll, options.animateDuration);
         }
     }
 
     _addEventListeners(w, container, options, support) {
-        this._rotationHandler(w, support);
         this._scrollingHandler();
-        this._doubleTapHandler();
-        this._pinchHandler();
+        this._rotationHandler(w, support);
+
+        if (options.allowFullscreen) {
+            this._doubleTapHandler();
+            this._pinchHandler(container, support);
+        }
 
         super._addEventListeners.apply(this, arguments);
     }
 
-    _setSlideWidth() {
-        this.slideWidth = parseFloat(getComputedStyle(this.head).getPropertyValue('width'));
-    }
-
-    _animateToSlide(slidePosition) {
+    _animateToSlide(slidePosition, duration) {
         const startPosition = this.shaft.scrollLeft;
         const delta = startPosition - slidePosition;
 
         animate(
             progress => {this.shaft.scrollLeft = startPosition - delta * progress},
-            this.options.animateDuration,
+            duration
         );
     }
 
@@ -82,63 +106,119 @@ export default class TouchSlider extends Core {
 
             event.preventDefault();
 
-            this.fullscreen();
+            let tapedSlide = closest.call(event.target, this.classNames.item);
+
+            if (!tapedSlide) {
+                return;
+            }
+
+            this.unstableState = true;
+
+            cinema.request(this.block, tapedSlide);
         });
     }
 
     _scrollingHandler() {
         const shaft = this.shaft;
         const scrollEndHandler = () => {
-            this.scrolling = false;
-
-            // только если нет касаний к экрану
-            if (this.touched === false) {
-                // как только мы поменяем значение, сработает action
+            if (this.programAction === false && this.preventCorrection === false) {
                 this.current = Math.round(shaft.scrollLeft / this.slideWidth);
             }
+
+            this.preventCorrection = false;
+            this.unstableState = false;
+            this.programAction = false;
         };
 
-        shaft.addEventListener('scroll', () => {this.scrolling = true});
-        shaft.addEventListener('scroll', debounce(scrollEndHandler, 50));
-
-        shaft.addEventListener('touchstart', () => {this.touched = true});
-        shaft.addEventListener('touchend', () => {
-            this.touched = false;
-
-            // скролл или таскание прекратились, палец убрали
-            if (this.scrolling === false) {
-                scrollEndHandler();
-            }
-        });
+        shaft.addEventListener('scroll', debounce(scrollEndHandler, 350), false);
     }
 
     _rotationHandler(w, support) {
-        // more flexible way to detect change of orientation
-        if (support.matchMedia) {
-            const matchPortrait = w.matchMedia('(orientation: portrait)');
-            const matchLandscape = w.matchMedia('(orientation: landscape)');
+        w.addEventListener('resize', () => {
+            // если это не экстренный случай, такие браузеры сами корректируют свое содержимое
+            if (support.scrollSnap && this.unstableState === true) {
+                this.preventCorrection = true;
+            }
 
-            // реагирует на поворот экрана
-            const orientationChangeHandler = query => {
-                if (query.matches === true) {
-                    // запомним, что произошел поворот
-                    // потом мы сможем свдинуть слайды без анимации зная, что этот сдвиг необходим из-за поворота
-                    // во время поворота анимации все равно не работают
-                    this.rotation = true;
-
-                    // карусель разберется, что нужно сделать
-                    this.setOptions();
-
-                    this.rotation = false;
-                }
-            };
-
-            matchPortrait.addListener(orientationChangeHandler);
-            matchLandscape.addListener(orientationChangeHandler);
-        } else {
-            w.addEventListener('orientationchange', this.setOptions.bind(this));
-        }
+            this.setOptions();
+        });
     }
 
-    _pinchHandler() {}
+    _pinchHandler(container, support) {
+        const MAX_SCALE = 1.2; // значение после которого увеличение будет гаситься
+        const MIN_SCALE = 0.8;
+        const FACTOR = 20;
+
+        const onPinchStartHandler = () => {
+            container.classList.add(this.classNames.mods.scaling);
+            container.classList.add(this.classNames.mods.touched);
+        };
+
+        const onScaleChangeHandler = event => {
+            event.preventDefault();
+
+            let scale = event.scale;
+
+            if (scale > MAX_SCALE && cinema.state.enabled === false) {
+                scale = MAX_SCALE + Math.log(scale) / FACTOR;
+            }
+
+            if (scale < MIN_SCALE) {
+                scale = MIN_SCALE + Math.log(scale) / Math.pow(FACTOR, 2);
+            }
+
+            this.shaft.style.transform = `scale(${scale.toFixed(3)})`;
+        };
+
+        const onPinchEndHandler = (event) => {
+            if (event.scale > MIN_SCALE && cinema.state.enabled === false) {
+
+                cinema.request(this.block, this.items[this.current]);
+
+                container.classList.remove(this.classNames.mods.scaling);
+            }
+
+            this.shaft.style.transform = '';
+            container.classList.remove(this.classNames.mods.touched);
+        };
+
+        // mobile safari
+        if (support.gestureEvents === true) {
+            this.block.addEventListener('gesturestart', onPinchStartHandler, false);
+            this.block.addEventListener('gesturechange', onScaleChangeHandler, false);
+            this.block.addEventListener('gestureend', onPinchEndHandler, false);
+        } else {
+            let manualCalculatedScale;
+            let pinchStartEvent;
+
+            this.block.addEventListener('touchstart', event => {
+                if (event.touches.length !== 2) {
+                    return;
+                }
+
+                pinchStartEvent = event;
+
+                onPinchStartHandler(event);
+            }, false);
+
+            this.block.addEventListener('touchmove', event => {
+                if (!pinchStartEvent) {return;}
+
+                const myEvent = {
+                    preventDefault: event.preventDefault.bind(event),
+                    scale: getScale(pinchStartEvent.touches, event.touches)
+                };
+
+                onScaleChangeHandler(myEvent);
+            }, false);
+
+            this.block.addEventListener('touchend', event => {
+                if (!pinchStartEvent) {return;}
+
+                onPinchEndHandler(event, manualCalculatedScale);
+
+                pinchStartEvent = null;
+            });
+        }
+    }
 }
