@@ -1,0 +1,14 @@
+.goos_show-next .goos__shaft
+{
+    padding-left: 30px; /* 1 */
+}
+
+.goos_show-next.goos_margin.goos_size_2 .goos__shaft::after
+{
+    display: block;
+
+    /* 30 - border-right + (border-right / size) */
+    min-width: 23px;
+
+    content: '';
+}
