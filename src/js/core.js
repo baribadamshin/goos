@@ -1,7 +1,7 @@
 'use strict';
 
 import getBrowserSupportFeatures from './utils/getBrowserSupportFeatures';
-import getOptionsFromClassList from './utils/getOptionsFromClassList'
+import getOptionsFromClassList from './utils/getOptionsFromClassList';
 
 import cinema from './components/cinema';
 
@@ -221,7 +221,9 @@ export default class Core {
      */
     _addEventListeners(w, container, options, support) {
         if (support.mutationObserver) {
-            const observer = new MutationObserver(this.setOptions.bind(this));
+            const observer = new MutationObserver(() => {
+                this.setOptions.bind(this);
+            });
 
             observer.observe(container, {
                 attributes: true,
@@ -236,9 +238,7 @@ export default class Core {
             this.block.addEventListener(cinema.changeEventName, () => {
                 this.block.classList.toggle(this.classNames.mods.fullscreen);
 
-                if (!support.mutationObserver) {
-                    this.setOptions();
-                }
+                this.setOptions();
             });
 
             // это клик по крестику, а не по блоку в целом

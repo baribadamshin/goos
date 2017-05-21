@@ -34,13 +34,12 @@ export default (function (html) {
     const afterGoosOut = event => {
         const goos = event.target;
 
-        goos.dispatchEvent(new CustomEvent(FULLSCREEN_CHANGE_EVENT));
-
         goos.classList.remove(CLASS_NAMES.goos.out);
         goos.classList.remove(CLASS_NAMES.goos.in);
 
         cinema.classList.add(CLASS_NAMES.block.out);
 
+        goos.dispatchEvent(new CustomEvent(FULLSCREEN_CHANGE_EVENT));
         goos.removeEventListener(ANIMATION_END_EVENT_NAME, afterGoosOut);
 
         state.enabled = false;
