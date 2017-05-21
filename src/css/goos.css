@@ -33,6 +33,9 @@
 @import '_animation/goos_animation_off.css';
 @import '_touched/goos_touched.css';
 
+/* особенности */
+@import "_show-next/goos_show-next.css";
+
 /* фуллскрин */
 @import '_fullscreen/goos_fullscreen.css';
 

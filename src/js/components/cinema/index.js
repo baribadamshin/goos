@@ -28,17 +28,20 @@ export default (function (html) {
 
     const afterCinemaOut = event => {
         html.classList.remove(CLASS_NAMES.outer);
+
         cinema.parentNode.removeChild(cinema);
     };
 
     const afterGoosOut = event => {
         const goos = event.target;
 
-        goos.dispatchEvent(new CustomEvent(FULLSCREEN_CHANGE_EVENT));
 
         goos.classList.remove(CLASS_NAMES.goos.out);
         goos.classList.remove(CLASS_NAMES.goos.in);
 
+        goos.dispatchEvent(new CustomEvent(FULLSCREEN_CHANGE_EVENT));
+
+        cinema.addEventListener(ANIMATION_END_EVENT_NAME, afterCinemaOut, false);
         cinema.classList.add(CLASS_NAMES.block.out);
 
         goos.removeEventListener(ANIMATION_END_EVENT_NAME, afterGoosOut);
@@ -47,9 +50,10 @@ export default (function (html) {
     };
 
     const afterFakeSlideShowedUp = (goos, event) => {
-        goos.dispatchEvent(new CustomEvent(FULLSCREEN_CHANGE_EVENT));
 
         goos.classList.add(CLASS_NAMES.goos.in);
+
+        goos.dispatchEvent(new CustomEvent(FULLSCREEN_CHANGE_EVENT));
 
         html.classList.add(CLASS_NAMES.outer);
 
@@ -79,9 +83,8 @@ export default (function (html) {
         },
         close() {
             state.goos.addEventListener(ANIMATION_END_EVENT_NAME, afterGoosOut, false);
-            state.goos.classList.add(CLASS_NAMES.goos.out);
 
-            cinema.addEventListener(ANIMATION_END_EVENT_NAME, afterCinemaOut, false);
+            state.goos.classList.add(CLASS_NAMES.goos.out);
         }
     };
 }(document.documentElement));

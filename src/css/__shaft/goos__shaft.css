@@ -8,6 +8,7 @@
 
     box-sizing: border-box;
 
+    min-width: 100%; /* us web */
     min-width: calc(100% + 0px); /* safari */
 
     margin: 0;
