@@ -14,6 +14,12 @@ export default class Core {
             return;
         }
 
+        // состояние когда нужно скорректировать положение слайдов
+        this.unstableState = false;
+
+        // предотвратить корректировку
+        this.preventCorrection = false;
+
         this.support = getBrowserSupportFeatures();
 
         this.setDomElements(container);
@@ -93,27 +99,25 @@ export default class Core {
      * @param {HtmlElement} container
      */
     setDomElements(container) {
-        const goos = 'goos';
-        
         this.classNames = {
-            base: goos,
-            shaft: goos + '__shaft',
+            base: 'goos',
+            shaft: 'goos__shaft',
             mods: {
-                init: goos + '_init',
-                fullscreen: goos + '_fullscreen'
+                init: 'goos_init',
+                fullscreen: 'goos_fullscreen'
             },
-            item: goos + '__item',
-            close: goos + '__close',
+            item: 'goos__item',
+            close: 'goos__close',
             arrows: {
-                base: goos + '__arrow',
-                prev: goos + '__arrow_prev',
-                next: goos + '__arrow_next'
+                base: 'goos__arrow',
+                prev: 'goos__arrow_prev',
+                next: 'goos__arrow_next'
             },
             dots: {
-                init: goos + '_nav_dots',
-                base: goos + '__dots',
-                item: goos + '__dot',
-                active: goos + '__dot_active'
+                init: 'goos_nav_dots',
+                base: 'goos__dots',
+                item: 'goos__dot',
+                active: 'goos__dot_active'
             }
         };
 
@@ -222,7 +226,7 @@ export default class Core {
     _addEventListeners(w, container, options, support) {
         if (support.mutationObserver) {
             const observer = new MutationObserver(() => {
-                this.setOptions.bind(this);
+                //this.setOptions.bind(this);
             });
 
             observer.observe(container, {
@@ -238,6 +242,8 @@ export default class Core {
             this.block.addEventListener(cinema.changeEventName, () => {
                 this.block.classList.toggle(this.classNames.mods.fullscreen);
 
+
+                this.unstableState = true;
                 this.setOptions();
             });
 

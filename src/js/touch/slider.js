@@ -7,28 +7,12 @@ import cinema from '../components/cinema';
 import Core from '../core';
 
 export default class TouchSlider extends Core {
-    constructor(container, options) {
-        super(container, options);
-
-        // состояние когда нужно скорректировать положение слайдов
-        this.unstableState = false;
-
-        // предотвратить корректировку
-        this.preventCorrection = false;
-
-        // скролл или любое другое событие вызванное программным путем
-        // в этои режиме нет реакции на события
-        this.programAction = false;
-    }
-
     setUserInterface() {
-        const goos = 'goos';
-
         // специфичные тачовые классы
         this.classNames.mods = Object.assign(this.classNames.mods, {
-            init: goos + '_init_touch',
-            scaling: goos + '_scaling',
-            touched: goos + '_touched'
+            init: 'goos_init_touch',
+            scaling: 'goos_scaling',
+            touched: 'goos_touched'
         });
 
         super.setUserInterface();
@@ -60,9 +44,7 @@ export default class TouchSlider extends Core {
         }
 
         if (correctScroll !== this.shaft.scrollLeft) {
-            this.programAction = true;
-
-            if (this.unstableState === true) {
+            if (this.unstableState) {
                 this.shaft.scrollLeft = correctScroll;
 
                 return;
@@ -121,13 +103,12 @@ export default class TouchSlider extends Core {
     _scrollingHandler() {
         const shaft = this.shaft;
         const scrollEndHandler = () => {
-            if (this.programAction === false && this.preventCorrection === false) {
+            if (this.preventCorrection === false) {
                 this.current = Math.round(shaft.scrollLeft / this.slideWidth);
             }
 
             this.preventCorrection = false;
             this.unstableState = false;
-            this.programAction = false;
         };
 
         shaft.addEventListener('scroll', debounce(scrollEndHandler, 350), false);
@@ -182,7 +163,7 @@ export default class TouchSlider extends Core {
             container.classList.remove(this.classNames.mods.touched);
         };
 
-        // mobile safari
+        // native gesture events
         if (support.gestureEvents === true) {
             this.block.addEventListener('gesturestart', onPinchStartHandler, false);
             this.block.addEventListener('gesturechange', onScaleChangeHandler, false);
@@ -202,7 +183,9 @@ export default class TouchSlider extends Core {
             }, false);
 
             this.block.addEventListener('touchmove', event => {
-                if (!pinchStartEvent) {return;}
+                if (!pinchStartEvent) {
+                    return;
+                }
 
                 const myEvent = {
                     preventDefault: event.preventDefault.bind(event),
@@ -213,7 +196,9 @@ export default class TouchSlider extends Core {
             }, false);
 
             this.block.addEventListener('touchend', event => {
-                if (!pinchStartEvent) {return;}
+                if (!pinchStartEvent) {
+                    return;
+                }
 
                 onPinchEndHandler(event, manualCalculatedScale);
 

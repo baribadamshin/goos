@@ -53,10 +53,11 @@
     height: 100%;
     /* в этом режиме отрицательный margin не работает */
     padding-right: 0 !important;
+    padding-left: 0 !important;
 
     pointer-events: auto;
-    /* решает проблему с рендером масштабированных изображений во время прокрутки на андройде */
 
+    /* решает проблему с рендером масштабированных изображений во время прокрутки на андройде */
     clip-path: inset(0 0 0 0) !important;
 
     transition: all .4s;
@@ -65,6 +66,11 @@
 .goos_fullscreen.goos_margin .goos__shaft
 {
     margin-right: -14px;
+}
+
+.goos_fullscreen .goos__shaft::after
+{
+    min-width: 0 !important;
 }
 
 .goos_fullscreen .goos__item
