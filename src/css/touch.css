@@ -1,0 +1,9 @@
+/* вспомогательные штуки */
+@import '_init/goos_init_touch.css';
+@import '_touched/goos_touched.css';
+
+/* особенности */
+@import "_show-next/goos_show-next.css";
+
+/* интерактив */
+@import '_scaling/goos_scaling.css';

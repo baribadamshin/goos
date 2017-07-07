@@ -1,17 +1,6 @@
+/* layout */
 @import '__shaft/goos__shaft.css';
-
 @import '__item/goos__item.css';
-
-/* стрелки */
-@import '__arrow/goos__arrow.css';
-@import '__arrow/_disabled/goos__arrow_disabled.css';
-@import '__arrow/_prev/goos__arrow_prev.css';
-@import '__arrow/_next/goos__arrow_next.css';
-
-/* точки */
-@import '__dots/goos__dots.css';
-@import '__dot/goos__dot.css';
-@import '__dot/_active/goos__dot_active.css';
 
 /* размеры */
 @import '_size/goos_size_2.css';
@@ -24,17 +13,13 @@
 /* отступы */
 @import '_margin/goos_margin.css';
 
+/* точки */
+@import '__dots/goos__dots.css';
+@import '__dot/goos__dot.css';
+@import '__dot/_active/goos__dot_active.css';
+
 /* адаптивность */
 @import '_responsive/goos_responsive.css';
-
-/* вспомогательные штуки */
-@import '_init/goos_init.css';
-@import '_init/goos_init_touch.css';
-@import '_animation/goos_animation_off.css';
-@import '_touched/goos_touched.css';
-
-/* особенности */
-@import "_show-next/goos_show-next.css";
 
 /* фуллскрин */
 @import '_fullscreen/goos_fullscreen.css';
@@ -42,14 +27,16 @@
 /* появились элементы управления */
 @import '_nav/goos_nav_dots.css';
 
-/* интерактив */
-@import '_scaling/goos_scaling.css';
+@import 'desktop.css';
+@import 'touch.css';
+
 
 .goos
 {
     position: relative;
 }
 
+/* js читает этот элемент */
 .goos::before
 {
     position: absolute;
