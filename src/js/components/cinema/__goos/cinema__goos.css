@@ -1,4 +1,5 @@
 .cinema__goos
 {
     z-index: 9999;
+    transition-timing-function: step-start;
 }

@@ -2,7 +2,7 @@
 @import '__shaft/goos__shaft.css';
 @import '__item/goos__item.css';
 
-/* размеры */
+/* size */
 @import '_size/goos_size_2.css';
 @import '_size/goos_size_3.css';
 @import '_size/goos_size_4.css';
@@ -27,16 +27,12 @@
 /* появились элементы управления */
 @import '_nav/goos_nav_dots.css';
 
-@import 'desktop.css';
-@import 'touch.css';
-
-
 .goos
 {
     position: relative;
 }
 
-/* js читает этот элемент */
+/* js читает значение этого псевдоэлемента */
 .goos::before
 {
     position: absolute;

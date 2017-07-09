@@ -3,7 +3,7 @@
 import ANIMATION_END_EVENT_NAME from '../../utils/getAnimationEndEventName';
 import './cinema.css';
 
-const FULLSCREEN_CHANGE_EVENT = 'fullscreenChange';
+const CHANGE_EVENT = 'fullscreenChange';
 
 const CLASS_NAMES = {
     block: {
@@ -18,78 +18,86 @@ const CLASS_NAMES = {
     },
 };
 
-// TODO do it better
+/**
+ * 1. создает контейнер и копирует в него переданный объект
+ * 2. показывает контейнер
+ * 3. после того как контейнер показан
+ */
+
+
+
+// TODO: do it better
 export default (function (html) {
-    let cinema;
-    const state = {
+    const cinema = {
         enabled: false,
+        container: null,
         goos: null
     };
 
     const afterCinemaOut = event => {
         html.classList.remove(CLASS_NAMES.outer);
 
-        cinema.parentNode.removeChild(cinema);
+        cinema.container.parentNode.removeChild(cinema.container);
     };
 
     const afterGoosOut = event => {
         const goos = event.target;
 
-
         goos.classList.remove(CLASS_NAMES.goos.out);
         goos.classList.remove(CLASS_NAMES.goos.in);
 
-        goos.dispatchEvent(new CustomEvent(FULLSCREEN_CHANGE_EVENT));
+        goos.dispatchEvent(new CustomEvent(CHANGE_EVENT));
 
-        cinema.addEventListener(ANIMATION_END_EVENT_NAME, afterCinemaOut, false);
-        cinema.classList.add(CLASS_NAMES.block.out);
+        cinema.container.addEventListener(ANIMATION_END_EVENT_NAME, afterCinemaOut, false);
+        cinema.container.classList.add(CLASS_NAMES.block.out);
 
         goos.removeEventListener(ANIMATION_END_EVENT_NAME, afterGoosOut);
 
-        state.enabled = false;
+        cinema.enabled = false;
     };
 
-    const afterFakeSlideShowedUp = (goos, event) => {
+    const afterFakeSlideShowedUp = (goos, beforeShowingGoos, event) => {
+        if (typeof beforeShowingGoos === 'function') {
+            beforeShowingGoos();
+        }
+
+        goos.dispatchEvent(new CustomEvent(CHANGE_EVENT));
 
         goos.classList.add(CLASS_NAMES.goos.in);
-
-        goos.dispatchEvent(new CustomEvent(FULLSCREEN_CHANGE_EVENT));
-
         html.classList.add(CLASS_NAMES.outer);
 
-        cinema.removeChild(event.target);
+        cinema.container.removeChild(event.target);
 
-        state.enabled = true;
-        state.goos = goos;
+        cinema.enabled = true;
     };
 
     return {
-        changeEventName: FULLSCREEN_CHANGE_EVENT,
-        state,
-        request(goos, slide) {
-            if (state.enabled) {
+        changeEventName: CHANGE_EVENT,
+        cinema,
+        request(goos, slide, beforeShowingGoos) {
+            if (cinema.enabled) {
                 return;
             }
 
             const slideClone = slide.cloneNode(true);
-
-            cinema = createCinema();
+            const afterFakeSlideShowedUpHandler = afterFakeSlideShowedUp.bind(0, goos, beforeShowingGoos);
 
             slideClone.classList.add(CLASS_NAMES.slide);
+            slideClone.addEventListener(ANIMATION_END_EVENT_NAME, afterFakeSlideShowedUpHandler, false);
 
-            slideClone.addEventListener(ANIMATION_END_EVENT_NAME, afterFakeSlideShowedUp.bind(0, goos), false);
+            cinema.container = createCinemaContainer();
+            cinema.container.appendChild(slideClone);
 
-            cinema.appendChild(slideClone);
+            cinema.goos = goos;
         },
         close() {
-            state.goos.addEventListener(ANIMATION_END_EVENT_NAME, afterGoosOut, false);
-
-            state.goos.classList.add(CLASS_NAMES.goos.out);
+            cinema.goos.addEventListener(ANIMATION_END_EVENT_NAME, afterGoosOut, false);
+            cinema.goos.classList.add(CLASS_NAMES.goos.out);
         }
     };
 }(document.documentElement));
 
-function createCinema() {
+function createCinemaContainer() {
     let wrapper = document.createElement('div');
 
     wrapper.className = CLASS_NAMES.block.in;

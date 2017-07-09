@@ -96,7 +96,10 @@ export default class TouchSlider extends Core {
 
             this.unstableState = true;
 
-            cinema.request(this.block, tapedSlide);
+            cinema.request(this.block, tapedSlide, () => {
+                // перед тем как показать карусель
+                this.current = Array.prototype.slice.call(this.items).indexOf(tapedSlide);
+            });
         });
     }
 
@@ -151,16 +154,15 @@ export default class TouchSlider extends Core {
             this.shaft.style.transform = `scale(${scale.toFixed(3)})`;
         };
 
-        const onPinchEndHandler = (event) => {
+        const onPinchEndHandler = event => {
             if (event.scale > MIN_SCALE && cinema.state.enabled === false) {
-
                 cinema.request(this.block, this.items[this.current]);
-
-                container.classList.remove(this.classNames.mods.scaling);
             }
 
             this.shaft.style.transform = '';
+
             container.classList.remove(this.classNames.mods.touched);
+            container.classList.remove(this.classNames.mods.scaling);
         };
 
         // native gesture events

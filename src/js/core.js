@@ -218,7 +218,7 @@ export default class Core {
 
     /**
      * @param {Window} w
-     * @param {object} options
+     * @param {GoosOptions} options
      * @param {object} support
      * @param {HTMLElement} container
      * @protected
@@ -241,7 +241,6 @@ export default class Core {
         if (options.allowFullscreen) {
             this.block.addEventListener(cinema.changeEventName, () => {
                 this.block.classList.toggle(this.classNames.mods.fullscreen);
-
 
                 this.unstableState = true;
                 this.setOptions();
@@ -285,7 +284,11 @@ export default class Core {
         const container = this.dotsContainer;
         const dotsCount = this.screens;
 
-        if (container && container.children.length !== dotsCount) {
+        if (!container) {
+            return;
+        }
+
+        if (container.children.length !== dotsCount) {
             container.innerHTML = new Array(dotsCount + 1).join(`<li class="${this.classNames.dots.item}"/>`);
         }
 
@@ -333,7 +336,7 @@ export default class Core {
 
     setNavigationState() {
         this._options.enableArrows && this.setArrowsActivity();
-        this._options.enableDots && this.dotsContainer && this.setDots();
+        this._options.enableDots && this.setDots();
     }
 }
 

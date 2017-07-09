@@ -26,18 +26,20 @@ export default class Slider extends Core {
                 const target = event.target;
                 const classNames = this.classNames;
 
-                // стрелка влево
-                if (target.classList.contains(classNames.arrows.prev)) {
-                    this.prev();
-                }
+                if (options.enableArrows) {
+                    // стрелка влево
+                    if (target.classList.contains(classNames.arrows.prev)) {
+                        this.prev();
+                    }
 
-                // стрелка вправо
-                if (target.classList.contains(classNames.arrows.next)) {
-                    this.next();
+                    // стрелка вправо
+                    if (target.classList.contains(classNames.arrows.next)) {
+                        this.next();
+                    }
                 }
 
                 // клик по точке в навигации
-                if (target.classList.contains(classNames.dots.item)) {
+                if (options.enableDots && target.classList.contains(classNames.dots.item)) {
                     const dotIndex = [].indexOf.call(this.dotsContainer.children, target);
                     const screenIndex = Math.round(this.items.length / this.screens * dotIndex);
 

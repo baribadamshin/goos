@@ -1,9 +1,6 @@
-.goos_scaling
-{
-    overflow: visible;
-}
-
-.goos_scaling .goos__dots
+.goos_scaling .goos__dots,
+.goos_scaling::after
 {
     transition: opacity .2s;
+    opacity: .1;
 }

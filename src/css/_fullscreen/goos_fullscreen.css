@@ -59,8 +59,6 @@
 
     /* решает проблему с рендером масштабированных изображений во время прокрутки на андройде */
     clip-path: inset(0 0 0 0) !important;
-
-    transition: all .4s;
 }
 
 .goos_fullscreen.goos_margin .goos__shaft

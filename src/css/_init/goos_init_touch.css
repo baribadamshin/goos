@@ -16,4 +16,5 @@
 .goos_init_touch .goos__dots
 {
     pointer-events: none;
+    touch-action: none;
 }

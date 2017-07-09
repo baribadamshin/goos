@@ -6,4 +6,5 @@
 .goos_init .goos__item:first-child
 {
     transition: .65s margin-left ease;
+    will-change: margin-left;
 }
