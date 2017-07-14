@@ -6,7 +6,7 @@ import cinema from '../components/cinema';
 
 import Core from '../core';
 
-export default class TouchSlider extends Core {
+export default class Touch extends Core {
     setUserInterface() {
         // специфичные тачовые классы
         this.classNames.mods = Object.assign(this.classNames.mods, {

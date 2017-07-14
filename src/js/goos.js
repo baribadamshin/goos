@@ -1,7 +1,7 @@
-import Slider from './desktop/slider'
-import TouchSlider from './touch/slider'
+import Desktop from './desktop'
+import Touch from './touch'
 
-import '../css/goos.css';
+import '../css/index.css';
 
 function isMobile() {
     // современные мобильные браузеры
@@ -14,7 +14,7 @@ function isMobile() {
 }
 
 module.exports = function goos(domElements, options) {
-    const Instance = isMobile() ? TouchSlider : Slider;
+    const Instance = isMobile() ? Touch : Desktop;
     const init = domElement => new Instance(domElement, options);
 
     if (domElements && domElements.length) {

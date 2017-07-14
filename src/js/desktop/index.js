@@ -1,7 +1,7 @@
 import debounce from '../helpers/debounce';
 import Core from '../core';
 
-export default class Slider extends Core {
+export default class Desktop extends Core {
     action(current, options) {
         this.head.style.marginLeft = (-100 * current) + '%';
     }
